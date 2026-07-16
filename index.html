@@ -6,1355 +6,751 @@
 <title>Hanabi Deluxe II</title>
 <style>
 :root {
-  --red: #c0392b; --red-light: #fdf0ef; --red-mid: #e8b4b0;
-  --yellow: #d4a017; --yellow-light: #fdf8e8; --yellow-mid: #e8d4a0;
-  --green: #27ae60; --green-light: #edfaf3; --green-mid: #a8dfc0;
-  --blue: #1a6fb5; --blue-light: #eff6fd; --blue-mid: #a8c8e8;
-  --white: #7f8c8d; --white-light: #f8f9f9; --white-mid: #c8cccf;
-  --bg: #1a1814;
-  --surface: #242019;
-  --surface2: #2e2920;
-  --border: #3a342a;
-  --border2: #4a4238;
-  --ink: #f0ead8;
-  --ink2: #b8ae98;
-  --ink3: #7a7060;
-  --accent: #c8a050;
-  --accent2: #a07830;
-  --win: #27ae60;
-  --loss: #c0392b;
-  --radius: 10px;
-  --tile-w: 62px;
-  --tile-h: 84px;
+  --red:#c0392b; --yellow:#d4a017; --green:#27ae60; --blue:#1a6fb5; --white:#8a8880;
+  --bg:#18150f; --surface:#22201a; --surface2:#2c2920; --surface3:#363028;
+  --border:#3a3428; --border2:#4a4238;
+  --ink:#f0ead8; --ink2:#b0a890; --ink3:#6a6050;
+  --accent:#c8a050; --radius:8px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-  min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.5;
-}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);font-size:13px;display:flex;flex-direction:column;}
 
 /* ── SETUP ── */
-#setup {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-}
-.setup-card {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 40px;
-  width: 100%;
-  max-width: 460px;
-}
-.setup-title {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--accent);
-  margin-bottom: 4px;
-}
-.setup-sub {
-  color: var(--ink3);
-  margin-bottom: 32px;
-  font-size: 13px;
-}
-.field { margin-bottom: 20px; }
-.field label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink3);
-  margin-bottom: 8px;
-}
-.field select, .field input {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  color: var(--ink);
-  font-size: 14px;
-  padding: 10px 14px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.field select:focus, .field input:focus { border-color: var(--accent); }
-.seat-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.seat-chip {
-  padding: 7px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border2);
-  font-size: 13px;
-  cursor: pointer;
-  user-select: none;
-  background: var(--surface2);
-  color: var(--ink2);
-  transition: all 0.15s;
-}
-.seat-chip.on { background: var(--accent); color: #1a1208; border-color: var(--accent); font-weight: 600; }
-.btn-primary {
-  width: 100%;
-  background: var(--accent);
-  color: #1a1208;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  padding: 14px;
-  cursor: pointer;
-  font-family: inherit;
-  margin-top: 8px;
-  transition: background 0.15s;
-  letter-spacing: 0.01em;
-}
-.btn-primary:hover { background: #d8b060; }
+#setup{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:50;padding:24px;}
+.sc{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:36px;width:100%;max-width:440px;}
+.sc h1{font-size:26px;font-weight:800;color:var(--accent);letter-spacing:-0.5px;margin-bottom:3px;}
+.sc .sub{color:var(--ink3);font-size:12px;margin-bottom:28px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:6px;}
+.field select,.field input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;color:var(--ink);font-size:13px;padding:9px 12px;font-family:inherit;outline:none;}
+.field select:focus,.field input:focus{border-color:var(--accent);}
+.seat-row{display:flex;gap:6px;flex-wrap:wrap;}
+.seat-chip{padding:6px 13px;border-radius:999px;border:1px solid var(--border2);font-size:12px;cursor:pointer;user-select:none;background:var(--surface2);color:var(--ink2);transition:all .15s;}
+.seat-chip.on{background:var(--accent);color:#1a1208;border-color:var(--accent);font-weight:700;}
+.btn-go{width:100%;background:var(--accent);color:#1a1208;border:none;border-radius:9px;font-size:15px;font-weight:800;padding:13px;cursor:pointer;font-family:inherit;margin-top:6px;transition:background .15s;}
+.btn-go:hover{background:#d8b060;}
 
-/* ── GAME LAYOUT ── */
-#game { display: none; flex-direction: column; min-height: 100vh; }
-#game.visible { display: flex; }
+/* ── GAME SHELL ── */
+#game{display:none;flex-direction:column;height:100%;}
+#game.on{display:flex;}
 
-.game-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  gap: 16px;
-  flex-wrap: wrap;
+/* TOP BAR */
+.topbar{
+  display:grid;
+  grid-template-columns:auto 1fr auto auto auto auto;
+  align-items:center;
+  gap:0;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:0;
+  flex-shrink:0;
+  height:52px;
 }
-.game-title { font-size: 15px; font-weight: 700; color: var(--accent); }
-.header-stats { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-.stat { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink2); }
-.stat strong { color: var(--ink); font-weight: 600; }
+.tb-title{font-size:14px;font-weight:800;color:var(--accent);padding:0 16px;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;}
+.tb-fireworks{display:flex;align-items:center;gap:8px;padding:0 16px;border-right:1px solid var(--border);height:100%;}
+.fw-stack{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.fw-label{font-size:9px;font-weight:700;letter-spacing:.04em;}
+.fw-pips-row{display:flex;gap:2px;}
+.fw-dot{width:9px;height:9px;border-radius:2px;border:1px solid var(--border2);}
+.fw-dot.on{border:none;}
+.tb-tokens{display:flex;flex-direction:column;gap:4px;padding:0 14px;border-right:1px solid var(--border);height:100%;justify-content:center;}
+.tok-row{display:flex;gap:3px;align-items:center;}
+.tok-label{font-size:9px;color:var(--ink3);width:36px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.tok{width:10px;height:10px;border-radius:50%;}
+.tok.c-on{background:#4a90d9;}
+.tok.c-off{background:var(--border2);}
+.tok.f-on{background:#c0392b;}
+.tok.f-off{background:var(--border2);}
+.tb-stats{display:flex;flex-direction:column;gap:2px;padding:0 14px;border-right:1px solid var(--border);height:100%;justify-content:center;}
+.tb-stat{font-size:11px;color:var(--ink3);}
+.tb-stat strong{color:var(--ink);font-weight:700;}
+.tb-winmeter{padding:0 14px;border-right:1px solid var(--border);height:100%;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:130px;}
+.wm-label{font-size:10px;font-weight:700;color:var(--ink3);display:flex;justify-content:space-between;}
+.wm-track{height:7px;background:var(--surface2);border-radius:999px;border:1px solid var(--border);overflow:hidden;}
+.wm-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#c0392b,#d4a017 50%,#27ae60);transition:width .5s ease;}
+.tb-btns{padding:0 12px;display:flex;gap:8px;align-items:center;}
 
-.tokens-display { display: flex; gap: 4px; align-items: center; }
-.token { width: 13px; height: 13px; border-radius: 50%; }
-.token.clue-on { background: #4a90d9; }
-.token.clue-off { background: var(--border2); }
-.token.fuse-on { background: var(--red); }
-.token.fuse-off { background: var(--border2); }
+/* BODY */
+.body{display:grid;grid-template-columns:1fr 280px;flex:1;overflow:hidden;min-height:0;}
 
-.btn-sm {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--ink2);
-  border-radius: 7px;
-  font-size: 12px;
-  padding: 5px 12px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
-.btn-sm:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn-sm.danger { color: var(--red); border-color: var(--red); }
-.btn-sm.danger:hover { background: var(--red); color: #fff; }
+/* MAIN (left) */
+.main{display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.main-scroll{overflow-y:auto;flex:1;padding:14px;display:flex;flex-direction:column;gap:12px;}
 
-.game-body {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  flex: 1;
-  overflow: hidden;
-}
+/* SIDEBAR (right) */
+.sidebar{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--surface);}
+.sb-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sb-tab{flex:1;padding:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;color:var(--ink3);border:none;background:none;font-family:inherit;text-transform:uppercase;letter-spacing:.06em;transition:all .15s;border-bottom:2px solid transparent;}
+.sb-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.sb-pane{display:none;flex:1;overflow-y:auto;padding:12px;}
+.sb-pane.active{display:block;}
 
-/* ── LEFT SIDEBAR ── */
-.sidebar {
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding: 16px;
-  gap: 16px;
-}
-.sidebar-section-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink3);
-  margin-bottom: 10px;
-}
-
-/* fireworks */
-.fireworks-grid { display: flex; flex-direction: column; gap: 6px; }
-.fw-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.fw-color-dot {
-  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-}
-.fw-pips { display: flex; gap: 3px; flex: 1; }
-.fw-pip {
-  width: 12px; height: 12px; border-radius: 3px;
-  border: 1px solid var(--border2);
-}
-.fw-pip.filled { border: none; }
-.fw-score { font-size: 13px; font-weight: 600; min-width: 20px; text-align: right; }
-.fw-total { font-size: 13px; color: var(--ink3); }
-
-/* win prob meter */
-.win-meter { }
-.win-bar-track {
-  height: 10px;
-  background: var(--surface2);
-  border-radius: 999px;
-  overflow: hidden;
-  margin: 8px 0 4px;
-  border: 1px solid var(--border);
-}
-.win-bar-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--red), var(--yellow) 50%, var(--green));
-  transition: width 0.4s ease;
-  transform-origin: left;
-}
-.win-bar-label {
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-}
-.win-computing { font-size: 11px; color: var(--ink3); font-style: italic; margin-top: 2px; }
-
-/* discard pile */
-.discard-section { }
-.discard-color-group { margin-bottom: 8px; }
-.discard-color-label {
-  font-size: 11px;
-  color: var(--ink3);
-  margin-bottom: 4px;
-  font-weight: 600;
-}
-.discard-tiles { display: flex; gap: 4px; flex-wrap: wrap; }
-
-/* log */
-.log-scroll { max-height: 180px; overflow-y: auto; }
-.log-line { font-size: 12px; color: var(--ink3); padding: 2px 0; border-bottom: 1px solid var(--border); }
-.log-line .lnum { color: var(--ink2); font-weight: 600; margin-right: 4px; }
-.log-line.play-ok { color: var(--green-mid); }
-.log-line.play-bad { color: var(--red-mid); }
-.log-line.clue { color: #a0b8d8; }
-.log-line.discard { color: var(--ink3); }
-
-/* ── MAIN AREA ── */
-.main { overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-
-/* hands */
-.hands-section { display: flex; flex-direction: column; gap: 12px; }
-.player-row {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  transition: border-color 0.2s;
-}
-.player-row.active-player { border-color: var(--accent); }
-.player-row.clue-target-available { border-color: var(--border2); cursor: default; }
-.player-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.player-name { font-weight: 600; font-size: 14px; }
-.tag {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-weight: 600;
-}
-.tag.turn { background: var(--accent); color: #1a1208; }
-.tag.bot { background: var(--surface2); color: var(--ink3); border: 1px solid var(--border2); }
-.tag.human { background: #1a3050; color: #88b8e0; border: 1px solid #2a5080; }
-
-.hand { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+/* ── PLAYER ROWS ── */
+.player-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;transition:border-color .2s;}
+.player-row.active{border-color:var(--accent);}
+.player-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.player-name{font-weight:700;font-size:13px;}
+.tag{font-size:10px;padding:2px 7px;border-radius:999px;font-weight:700;}
+.tag.turn{background:var(--accent);color:#1a1208;}
+.tag.bot{background:var(--surface2);color:var(--ink3);border:1px solid var(--border2);}
+.tag.human{background:#1a2e48;color:#78a8d0;border:1px solid #254870;}
+.hand{display:flex;gap:7px;flex-wrap:wrap;align-items:flex-end;}
 
 /* ── TILES ── */
-.tile {
-  width: var(--tile-w);
-  height: var(--tile-h);
-  border-radius: 8px;
-  border: 1px solid #5a4e34;
-  background: linear-gradient(160deg, #f5efd0 0%, #e8ddb0 100%);
-  box-shadow: 0 2px 0 #8a7840, 0 4px 8px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  position: relative;
-  cursor: default;
-  transition: transform 0.1s, box-shadow 0.1s;
-  flex-shrink: 0;
+.tile{
+  width:56px;height:76px;border-radius:7px;border:1px solid #5a4e30;
+  background:linear-gradient(155deg,#f5efd0 0%,#e6dba8 100%);
+  box-shadow:0 2px 0 #7a6e30,0 4px 7px rgba(0,0,0,.55);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  position:relative;flex-shrink:0;cursor:default;transition:transform .1s,box-shadow .1s;
 }
-.tile.small {
-  width: 32px; height: 44px;
-  border-radius: 5px;
-  box-shadow: 0 1px 0 #8a7840, 0 2px 4px rgba(0,0,0,0.4);
-  gap: 3px;
-}
-.tile-gem {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 16px;
-  flex-shrink: 0;
-  box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.3);
-}
-.tile.small .tile-gem { width: 18px; height: 18px; font-size: 10px; }
-.tile-pips { display: flex; gap: 2px; }
-.pip { width: 5px; height: 5px; border-radius: 50%; opacity: 0.85; }
-.tile.small .pip { width: 3px; height: 3px; }
+.tile.sm{width:30px;height:42px;border-radius:5px;box-shadow:0 1px 0 #7a6e30,0 2px 4px rgba(0,0,0,.45);gap:2px;}
+.tile-gem{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,.25),0 1px 3px rgba(0,0,0,.35);}
+.tile.sm .tile-gem{width:16px;height:16px;font-size:9px;}
+.tile-pips{display:flex;gap:2px;}
+.pip{width:5px;height:5px;border-radius:50%;opacity:.8;}
+.tile.sm .pip{width:3px;height:3px;}
 
-/* hidden tile (current player's own hand) */
-.tile.hidden {
-  background: linear-gradient(160deg, #3a3020 0%, #2a2218 100%);
-  border-color: #5a4e2a;
-  box-shadow: 0 2px 0 #1a1610, 0 4px 8px rgba(0,0,0,0.6);
-  cursor: pointer;
-}
-.tile.hidden:hover { transform: translateY(-3px); box-shadow: 0 5px 0 #1a1610, 0 8px 12px rgba(0,0,0,0.6); }
-.tile.hidden.selected { outline: 2px solid var(--accent); outline-offset: 3px; transform: translateY(-4px); }
-.hidden-label {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--ink2);
-  text-align: center;
-  padding: 3px 4px;
-  line-height: 1.3;
-}
-.hidden-emblem { font-size: 18px; opacity: 0.3; }
-.tile-note {
-  position: absolute;
-  bottom: 3px; left: 2px; right: 2px;
-  font-size: 7.5px;
-  font-weight: 600;
-  color: #1a1208;
-  text-align: center;
-  line-height: 1.2;
-  background: rgba(255,220,100,0.85);
-  border-radius: 3px;
-  padding: 1px 2px;
-}
+/* hidden */
+.tile.hidden{background:linear-gradient(155deg,#38301e 0%,#26200e 100%);border-color:#504428;box-shadow:0 2px 0 #181408,0 4px 7px rgba(0,0,0,.65);cursor:pointer;}
+.tile.hidden:hover{transform:translateY(-4px);box-shadow:0 6px 0 #181408,0 10px 14px rgba(0,0,0,.6);}
+.tile.hidden.sel{outline:2px solid var(--accent);outline-offset:3px;transform:translateY(-5px);}
+.h-emblem{font-size:16px;opacity:.25;}
+.h-label{font-size:8.5px;font-weight:600;color:var(--ink2);text-align:center;padding:0 3px;line-height:1.3;}
+.h-note{position:absolute;bottom:2px;left:2px;right:2px;font-size:7px;font-weight:600;color:#1a1208;text-align:center;line-height:1.2;background:rgba(255,215,80,.88);border-radius:2px;padding:1px 2px;}
 
-/* opponent tile — clickable in clue mode */
-.tile.clueable { cursor: pointer; }
-.tile.clueable:hover { transform: translateY(-3px); box-shadow: 0 5px 0 #8a7840, 0 8px 12px rgba(0,0,0,0.5); }
-.tile.clue-highlighted { outline: 2px solid var(--accent); outline-offset: 3px; }
-.tile.clue-dimmed { opacity: 0.4; }
-.tile.empty-slot {
-  background: repeating-linear-gradient(45deg, #2a2418, #2a2418 5px, #241e14 5px, #241e14 10px);
-  box-shadow: none;
-  border: 1px dashed var(--border2);
+/* clueable */
+.tile.clueable{cursor:pointer;}
+.tile.clueable:hover{transform:translateY(-3px);box-shadow:0 5px 0 #7a6e30,0 8px 12px rgba(0,0,0,.5);}
+.tile.hl{outline:2px solid var(--accent);outline-offset:3px;}
+.tile.dim{opacity:.35;}
+.tile.empty{background:repeating-linear-gradient(45deg,#26221a,#26221a 5px,#201e16 5px,#201e16 10px);box-shadow:none;border:1px dashed var(--border2);}
+
+/* discard tile — smaller with color label */
+.disc-group{margin-bottom:10px;}
+.disc-color-header{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.disc-color-bar{width:3px;height:14px;border-radius:2px;flex-shrink:0;}
+.disc-color-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.disc-tiles{display:flex;gap:4px;flex-wrap:wrap;}
+.disc-tile{
+  width:28px;height:38px;border-radius:4px;border:1px solid #5a4e30;
+  background:linear-gradient(155deg,#f5efd0 0%,#e6dba8 100%);
+  box-shadow:0 1px 0 #7a6e30,0 2px 4px rgba(0,0,0,.45);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  flex-shrink:0;position:relative;
 }
+.disc-gem{width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:8px;box-shadow:inset 0 1px 2px rgba(255,255,255,.25);}
+.disc-pips{display:flex;gap:1px;}
+.disc-pip{width:3px;height:3px;border-radius:50%;opacity:.8;}
+.disc-tile.critical{outline:2px solid #c0392b;outline-offset:1px;}
+.disc-tile.last{outline:2px solid #d4a017;outline-offset:1px;}
+.disc-empty{font-size:11px;color:var(--ink3);font-style:italic;padding:4px 0;}
 
 /* ── ACTION PANEL ── */
-.action-panel {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-.action-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink2);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.action-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.action-hint { font-size: 13px; color: var(--ink3); margin-bottom: 10px; }
+.action-panel{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:13px 14px;}
+.ap-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:10px;}
+.ap-hint{font-size:12px;color:var(--ink3);margin-bottom:10px;}
+.ap-row{display:flex;gap:7px;flex-wrap:wrap;}
+.btn{background:var(--surface2);border:1px solid var(--border2);color:var(--ink2);border-radius:6px;font-size:12px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none;}
+.btn.danger{color:#c0392b;border-color:#c0392b;}
+.btn.danger:hover{background:#c0392b;color:#fff;}
 
-/* clue mode UI */
-.clue-mode-instructions {
-  background: #1a2a3a;
-  border: 1px solid #2a4a6a;
-  border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 13px;
-  color: #88b8d8;
-  margin-bottom: 12px;
-}
-.clue-type-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
-.clue-type-label { font-size: 12px; color: var(--ink3); margin-right: 4px; }
-.color-swatch {
-  width: 28px; height: 28px; border-radius: 6px;
-  cursor: pointer; border: 2px solid transparent;
-  transition: all 0.15s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-.color-swatch:hover { transform: scale(1.15); }
-.color-swatch.chosen { border-color: #fff; transform: scale(1.15); }
-.color-swatch.unavail { opacity: 0.2; cursor: not-allowed; transform: none !important; }
-.rank-btn {
-  width: 32px; height: 32px; border-radius: 6px;
-  background: var(--surface2); border: 1px solid var(--border2);
-  color: var(--ink); font-weight: 700; font-size: 14px;
-  cursor: pointer; font-family: inherit;
-  transition: all 0.15s;
-}
-.rank-btn:hover { border-color: var(--accent); color: var(--accent); }
-.rank-btn.chosen { background: var(--accent); color: #1a1208; border-color: var(--accent); }
-.rank-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+/* clue UI */
+.clue-box{background:#141e28;border:1px solid #1e3a5a;border-radius:7px;padding:10px 12px;font-size:12px;color:#78a8c8;margin-bottom:10px;}
+.clue-pick{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;}
+.clue-pick-label{font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-right:2px;}
+.cswatch{width:24px;height:24px;border-radius:5px;cursor:pointer;border:2px solid transparent;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.35);}
+.cswatch:hover{transform:scale(1.18);}
+.cswatch.on{border-color:#fff;transform:scale(1.18);}
+.cswatch.na{opacity:.18;cursor:not-allowed;transform:none!important;}
+.rbtn{width:28px;height:28px;border-radius:5px;background:var(--surface2);border:1px solid var(--border2);color:var(--ink);font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.rbtn:hover{border-color:var(--accent);color:var(--accent);}
+.rbtn.on{background:var(--accent);color:#1a1208;border-color:var(--accent);}
+.rbtn:disabled{opacity:.2;cursor:not-allowed;}
 
 /* advice */
-.advice-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-.advice-table td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
-.advice-table td:first-child { color: var(--ink3); }
-.advice-table td:last-child { text-align: right; font-weight: 600; }
-.advice-rec {
-  margin-top: 10px;
-  background: #1a2a1a;
-  border: 1px solid #2a5a2a;
-  border-radius: 7px;
-  padding: 10px 12px;
-  font-size: 13px;
-  color: #88d898;
-}
+.advice-rows{margin-top:8px;}
+.adv-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);color:var(--ink3);}
+.adv-row strong{color:var(--ink);}
+.adv-rec{margin-top:8px;background:#0e1e0e;border:1px solid #1e4a1e;border-radius:6px;padding:8px 10px;font-size:12px;color:#70c880;}
 
-/* thinking trace */
-.think-scroll { max-height: 120px; overflow-y: auto; }
-.think-line { font-size: 11px; color: var(--ink3); font-style: italic; padding: 1px 0; }
+/* log */
+.log-line{font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);color:var(--ink3);}
+.log-line .n{color:var(--ink2);font-weight:700;margin-right:4px;}
+.log-line.ok{color:#70b880;}
+.log-line.bad{color:#d07070;}
+.log-line.clu{color:#7098c0;}
+.log-line.dis{color:var(--ink3);}
 
-/* game over banner */
-.game-over-banner {
-  border-radius: var(--radius);
-  padding: 20px 24px;
-  text-align: center;
-}
-.game-over-banner.win { background: #0e2e1a; border: 1px solid var(--win); color: #5ae098; }
-.game-over-banner.loss { background: #2e0e0e; border: 1px solid var(--loss); color: #e05858; }
-.game-over-banner.deck_out { background: #0e1a2e; border: 1px solid #3060a0; color: #7090d0; }
-.game-over-banner h2 { font-size: 22px; margin-bottom: 6px; }
-.game-over-banner p { font-size: 14px; opacity: 0.8; }
+/* bot trace */
+.trace-line{font-size:10px;color:var(--ink3);font-style:italic;padding:2px 0;}
 
-/* ── PASS OVERLAY ── */
-.overlay {
-  position: fixed; inset: 0;
-  background: rgba(10,8,5,0.92);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100;
-}
-.overlay-card {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 48px 40px;
-  text-align: center;
-  max-width: 360px;
-}
-.overlay-card h3 { font-size: 20px; margin-bottom: 8px; color: var(--accent); }
-.overlay-card p { color: var(--ink3); margin-bottom: 24px; font-size: 14px; }
+/* game over */
+.go-banner{border-radius:var(--radius);padding:18px 20px;text-align:center;margin-bottom:12px;}
+.go-banner.win{background:#0a1e0e;border:1px solid #27ae60;color:#60d878;}
+.go-banner.loss{background:#1e0a0a;border:1px solid #c0392b;color:#d86060;}
+.go-banner.deck_out{background:#0a0e1e;border:1px solid #1a50a0;color:#6088d0;}
+.go-banner h2{font-size:20px;margin-bottom:5px;}
+.go-banner p{font-size:12px;opacity:.75;}
 
-/* ── TOAST ── */
-.toast-container {
-  position: fixed; bottom: 24px; right: 24px;
-  display: flex; flex-direction: column; gap: 8px;
-  z-index: 200;
-}
-.toast {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 13px;
-  color: var(--ink);
-  max-width: 280px;
-  animation: slideIn 0.2s ease;
-}
-.toast.error { border-color: var(--red); color: #e08888; }
-@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* pass overlay */
+.overlay{position:fixed;inset:0;background:rgba(8,6,3,.93);display:flex;align-items:center;justify-content:center;z-index:100;}
+.ov-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:44px 36px;text-align:center;max-width:340px;}
+.ov-card h3{font-size:18px;color:var(--accent);margin-bottom:6px;}
+.ov-card p{color:var(--ink3);font-size:13px;margin-bottom:22px;}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 700px) {
-  .game-body { grid-template-columns: 1fr; }
-  .sidebar { border-right: none; border-bottom: 1px solid var(--border); max-height: 300px; }
-  :root { --tile-w: 52px; --tile-h: 72px; }
-}
+/* toast */
+.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:7px;z-index:200;}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 14px;font-size:12px;color:var(--ink);max-width:260px;animation:sli .2s ease;}
+.toast.err{border-color:#c0392b;color:#d08080;}
+@keyframes sli{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 </style>
 </head>
 <body>
 
-<!-- ── SETUP SCREEN ── -->
+<!-- SETUP -->
 <div id="setup">
-  <div class="setup-card">
-    <div class="setup-title">Hanabi Deluxe II</div>
-    <div class="setup-sub">Cooperative fireworks for 2–5 players · 50 tiles · 8 clues · 3 fuses</div>
-
+  <div class="sc">
+    <h1>Hanabi Deluxe II</h1>
+    <div class="sub">Cooperative fireworks · 50 tiles · 8 clues · 3 fuses</div>
     <div class="field">
-      <label>Number of players</label>
-      <select id="player-count">
-        <option value="2">2 players</option>
-        <option value="3" selected>3 players</option>
-        <option value="4">4 players</option>
-        <option value="5">5 players</option>
-      </select>
+      <label>Players</label>
+      <select id="pc"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select>
     </div>
     <div class="field">
-      <label>Seed (optional — leave blank for random)</label>
-      <input id="seed-input" type="number" placeholder="e.g. 42">
+      <label>Seed (optional)</label>
+      <input id="seed" type="number" placeholder="leave blank for random">
     </div>
     <div class="field">
-      <label>Human seats (others are bots)</label>
-      <div class="seat-row" id="seat-toggles"></div>
+      <label>Human seats</label>
+      <div class="seat-row" id="seats"></div>
     </div>
-    <button class="btn-primary" id="start-btn">Start game →</button>
+    <button class="btn-go" id="startbtn">Start game →</button>
   </div>
 </div>
 
-<!-- ── GAME SCREEN ── -->
+<!-- GAME -->
 <div id="game">
-  <header class="game-header">
-    <div class="game-title">Hanabi Deluxe II</div>
-    <div class="header-stats" id="header-stats"></div>
-    <button class="btn-sm" id="restart-btn">New game</button>
-  </header>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="tb-title">Hanabi II</div>
+    <div class="tb-fireworks" id="tb-fw"></div>
+    <div class="tb-tokens" id="tb-tok"></div>
+    <div class="tb-stats" id="tb-stats"></div>
+    <div class="tb-winmeter" id="tb-win">
+      <div class="wm-label"><span>Win odds</span><span id="wm-pct">—</span></div>
+      <div class="wm-track"><div class="wm-fill" id="wm-fill" style="width:0%"></div></div>
+    </div>
+    <div class="tb-btns">
+      <button class="btn" id="newgame-btn">New game</button>
+    </div>
+  </div>
 
-  <div class="game-body">
-    <!-- sidebar -->
-    <aside class="sidebar">
-      <div>
-        <div class="sidebar-section-label">Fireworks · <span id="score-display">0</span>/25</div>
-        <div class="fireworks-grid" id="fireworks-grid"></div>
+  <!-- BODY -->
+  <div class="body">
+    <!-- MAIN -->
+    <div class="main">
+      <div class="main-scroll" id="main-scroll">
+        <div id="banner"></div>
+        <div id="hands"></div>
+        <div id="action"></div>
       </div>
-      <div class="win-meter">
-        <div class="sidebar-section-label">Win probability</div>
-        <div class="win-bar-label">
-          <span id="win-pct-label">—</span>
-          <span id="win-score-label" style="color:var(--ink3);font-weight:400;font-size:12px;"></span>
-        </div>
-        <div class="win-bar-track"><div class="win-bar-fill" id="win-bar" style="width:0%"></div></div>
-        <div class="win-computing" id="win-computing">Computing…</div>
-      </div>
-      <div class="discard-section">
-        <div class="sidebar-section-label">Discard pile</div>
-        <div id="discard-area"><span style="font-size:12px;color:var(--ink3)">Empty</span></div>
-      </div>
-      <div>
-        <div class="sidebar-section-label">Move history</div>
-        <div class="log-scroll" id="log-panel"></div>
-      </div>
-    </aside>
+    </div>
 
-    <!-- main -->
-    <main class="main" id="main-area">
-      <div id="banner-area"></div>
-      <div class="hands-section" id="hands-section"></div>
-      <div id="action-area"></div>
-      <div id="think-area" style="display:none">
-        <div class="sidebar-section-label" style="margin-bottom:6px;">Bot thinking</div>
-        <div class="think-scroll" id="think-panel"></div>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-tabs">
+        <button class="sb-tab active" data-pane="discard">Discards</button>
+        <button class="sb-tab" data-pane="log">History</button>
+        <button class="sb-tab" data-pane="trace">Bot</button>
       </div>
-    </main>
+      <div class="sb-pane active" id="pane-discard"></div>
+      <div class="sb-pane" id="pane-log"></div>
+      <div class="sb-pane" id="pane-trace"></div>
+    </div>
   </div>
 </div>
 
-<!-- pass-device overlay -->
-<div class="overlay" id="pass-overlay" style="display:none">
-  <div class="overlay-card">
-    <h3 id="pass-title">Pass the device</h3>
-    <p id="pass-sub">Hand off to the next player</p>
-    <button class="btn-primary" id="pass-btn" style="width:auto;padding:12px 32px;">I'm ready →</button>
+<!-- PASS OVERLAY -->
+<div class="overlay" id="overlay" style="display:none">
+  <div class="ov-card">
+    <h3 id="ov-title">Pass the device</h3>
+    <p id="ov-sub">Hand off to the next player, then tap Ready.</p>
+    <button class="btn-go" style="width:auto;padding:11px 30px" id="ov-btn">I'm ready →</button>
   </div>
 </div>
 
-<!-- toast container -->
-<div class="toast-container" id="toast-container"></div>
+<div class="toast-wrap" id="toasts"></div>
 
 <script>
-// ── CONSTANTS ──
-const COLORS = ['Red','Yellow','Green','Blue','White'];
-const COLOR_HEX  = { Red:'#c62828', Yellow:'#d4a017', Green:'#27ae60', Blue:'#1a6fb5', White:'#9a9690' };
-const COLOR_BG   = { Red:'var(--red-light)', Yellow:'var(--yellow-light)', Green:'var(--green-light)', Blue:'var(--blue-light)', White:'var(--white-light)' };
-const RANK_COUNTS = {1:3, 2:2, 3:2, 4:2, 5:1};
-const MAX_CLUES = 8, MAX_FUSES = 3, FIREWORK_TOTAL = 25;
-const ALL_PAIRS = [];
-for (const c of COLORS) for (const r of Object.keys(RANK_COUNTS)) ALL_PAIRS.push(c + ',' + r);
+const COLORS=['Red','Yellow','Green','Blue','White'];
+const CHX={Red:'#c0392b',Yellow:'#d4a017',Green:'#27ae60',Blue:'#1a6fb5',White:'#8a8880'};
+const RC={1:3,2:2,3:2,4:2,5:1};
+const MAX_C=8,MAX_F=3,FW_TOT=25;
+const ALL_PAIRS=[];
+for(const c of COLORS)for(const r of Object.keys(RC))ALL_PAIRS.push(c+','+r);
+function handSize(n){return n<=3?5:4;}
 
-function handSize(n) { return (n <= 3) ? 5 : 4; }
+// RNG
+function mulberry(s){return()=>{s|=0;s=(s+0x6D2B79F5)|0;let t=Math.imul(s^(s>>>15),1|s);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+function mkRng(s){return mulberry(s==null||s===''?Math.floor(Math.random()*1e9):Number(s));}
 
-// ── RNG ──
-function mulberry32(seed) {
-  return function() {
-    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-function makeRng(seed) {
-  const s = (seed == null || seed === '') ? Math.floor(Math.random() * 1e9) : Number(seed);
-  return mulberry32(s);
-}
-
-// ── DECK ──
-function newDeck(rng) {
-  const deck = [];
-  for (const c of COLORS) for (const r in RANK_COUNTS) for (let i = 0; i < RANK_COUNTS[r]; i++) deck.push({color:c, rank:parseInt(r)});
-  for (let i = deck.length-1; i > 0; i--) { const j = Math.floor(rng()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
-  return deck;
+// Knowledge
+function newK(){return{possible:new Set(ALL_PAIRS),notes:[]};}
+function isId(k){return k.possible.size===1;}
+function isUnt(k){return k.possible.size===ALL_PAIRS.length;}
+function pairOf(s){const i=s.lastIndexOf(',');return{color:s.slice(0,i),rank:parseInt(s.slice(i+1))};}
+function filterK(k,pred,note){k.possible=new Set([...k.possible].filter(pred));k.notes.push(note);}
+function descK(k){
+  if(isId(k)){const{color,rank}=pairOf([...k.possible][0]);return`${color[0]}${rank}`;}
+  const cs=new Set(),rs=new Set();
+  for(const p of k.possible){const{color,rank}=pairOf(p);cs.add(color);rs.add(rank);}
+  return`${cs.size<5?[...cs].map(c=>c[0]).sort().join(''):'?'}·${rs.size<5?[...rs].sort((a,b)=>a-b).join(''):'?'}`;
 }
 
-// ── KNOWLEDGE ──
-function newKnowledge() { return { possible: new Set(ALL_PAIRS), notes: [] }; }
-function isIdentified(k) { return k.possible.size === 1; }
-function isUntouched(k) { return k.possible.size === ALL_PAIRS.length; }
-function pairOf(str) { const i = str.lastIndexOf(','); return { color: str.slice(0,i), rank: parseInt(str.slice(i+1)) }; }
-function filterKnowledge(k, pred, note) {
-  const after = new Set([...k.possible].filter(pred));
-  k.possible = after; k.notes.push(note);
-}
-function describeKnowledge(k) {
-  if (isIdentified(k)) { const {color,rank}=pairOf([...k.possible][0]); return `${color[0]}${rank}`; }
-  const colors = new Set(), ranks = new Set();
-  for (const p of k.possible) { const {color,rank}=pairOf(p); colors.add(color); ranks.add(rank); }
-  const cs = colors.size < COLORS.length ? [...colors].map(c=>c[0]).sort().join('') : '?';
-  const rs = ranks.size < 5 ? [...ranks].sort((a,b)=>a-b).join('') : '?';
-  return `${cs}·${rs}`;
-}
-
-// ── GAME CLASS ──
-class HanabiGame {
-  constructor(n, seed) {
-    this.n = n; this.h = handSize(n);
-    this.rng = makeRng(seed);
-    this.deck = newDeck(this.rng);
-    this.hands = Array.from({length:n}, ()=>[]);
-    this.knowledge = Array.from({length:n}, ()=>[]);
-    for (let r = 0; r < this.h; r++) for (let p = 0; p < n; p++) this.drawToHand(p);
-    this.discardPile = [];
-    this.fireworks = {}; for (const c of COLORS) this.fireworks[c] = 0;
-    this.clueTokens = MAX_CLUES; this.strikes = 0;
-    this.currentPlayer = 0; this.turnCount = 0;
-    this.finalRoundLeft = null; this.gameOver = false; this.result = null;
-    this.log = []; this.discardsMade = 0; this.cluesGiven = 0;
+// Game
+class Game{
+  constructor(n,seed){
+    this.n=n;this.h=handSize(n);
+    const rng=mkRng(seed);
+    this.deck=[];
+    for(const c of COLORS)for(const r in RC)for(let i=0;i<RC[r];i++)this.deck.push({color:c,rank:parseInt(r)});
+    for(let i=this.deck.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[this.deck[i],this.deck[j]]=[this.deck[j],this.deck[i]];}
+    this.hands=Array.from({length:n},()=>[]);
+    this.know=Array.from({length:n},()=>[]);
+    for(let r=0;r<this.h;r++)for(let p=0;p<n;p++)this._draw(p);
+    this.disc=[];this.fw={};for(const c of COLORS)this.fw[c]=0;
+    this.clues=MAX_C;this.strikes=0;this.turn=0;this.turnN=0;
+    this.finalLeft=null;this.over=false;this.result=null;
+    this.log=[];this.discN=0;this.clueN=0;this.rng=rng;
   }
-  drawToHand(p) {
-    if (this.deck.length > 0) { this.hands[p].push(this.deck.pop()); this.knowledge[p].push(newKnowledge()); }
-  }
-  score() { return COLORS.reduce((s,c) => s + this.fireworks[c], 0); }
-  accountedCounts() {
-    const acc = {};
-    for (const card of this.discardPile) { const k = card.color+','+card.rank; acc[k]=(acc[k]||0)+1; }
-    for (const c of COLORS) for (let r=1; r<=this.fireworks[c]; r++) { const k=c+','+r; acc[k]=(acc[k]||0)+1; }
-    for (const hand of this.knowledge) for (const k of hand) if (isIdentified(k)) { const key=[...k.possible][0]; acc[key]=(acc[key]||0)+1; }
-    return acc;
-  }
-  runElimination() {
-    let changed = true;
-    while (changed) {
-      changed = false;
-      const acc = this.accountedCounts();
-      for (const hand of this.knowledge) for (const k of hand) {
-        if (isIdentified(k)) continue;
-        const before = k.possible, after = new Set(), removed = [];
-        for (const p of before) { const {rank}=pairOf(p); if ((acc[p]||0) < RANK_COUNTS[rank]) after.add(p); else removed.push(p); }
-        if (after.size !== before.size) {
-          for (const p of removed) k.notes.push(`elim ${p}`);
-          k.possible = after; changed = true;
-          if (after.size===1) k.notes.push(`=> must be ${[...after][0]}`);
-        }
-      }
-    }
-  }
-  legalActions(p) {
-    const a = [];
-    if (this.clueTokens > 0) for (let t=0; t<this.n; t++) {
-      if (t===p) continue;
-      for (const c of new Set(this.hands[t].map(x=>x.color))) a.push({kind:'clue',target:t,clueType:'color',value:c});
-      for (const r of new Set(this.hands[t].map(x=>x.rank))) a.push({kind:'clue',target:t,clueType:'rank',value:r});
-    }
-    if (this.clueTokens < MAX_CLUES) for (let i=0; i<this.hands[p].length; i++) a.push({kind:'discard',idx:i});
-    for (let i=0; i<this.hands[p].length; i++) a.push({kind:'play',idx:i});
+  _draw(p){if(this.deck.length>0){this.hands[p].push(this.deck.pop());this.know[p].push(newK());}}
+  score(){return COLORS.reduce((s,c)=>s+this.fw[c],0);}
+  accCounts(){
+    const a={};
+    for(const c of this.disc){const k=c.color+','+c.rank;a[k]=(a[k]||0)+1;}
+    for(const c of COLORS)for(let r=1;r<=this.fw[c];r++){const k=c+','+r;a[k]=(a[k]||0)+1;}
+    for(const hand of this.know)for(const k of hand)if(isId(k)){const key=[...k.possible][0];a[key]=(a[key]||0)+1;}
     return a;
   }
-  applyAction(p, action) {
-    if (this.gameOver) throw new Error('game over');
-    if (action.kind === 'clue') {
-      if (this.clueTokens <= 0) throw new Error('no clue tokens');
-      if (action.target === p) throw new Error("can't clue yourself");
-      let matched = false;
-      for (let i=0; i<this.hands[action.target].length; i++) {
-        const card = this.hands[action.target][i], k = this.knowledge[action.target][i];
-        if (action.clueType === 'color') {
-          const m = card.color === action.value;
-          filterKnowledge(k, s => (pairOf(s).color===action.value)===m, `color ${m?'IS':'NOT'} ${action.value}`);
-          if (m) matched = true;
-        } else {
-          const m = card.rank === action.value;
-          filterKnowledge(k, s => (pairOf(s).rank===action.value)===m, `rank ${m?'IS':'NOT'} ${action.value}`);
-          if (m) matched = true;
-        }
+  elim(){
+    let ch=true;
+    while(ch){ch=false;const a=this.accCounts();
+      for(const hand of this.know)for(const k of hand){
+        if(isId(k))continue;
+        const before=k.possible,after=new Set(),rm=[];
+        for(const p of before){const{rank}=pairOf(p);if((a[p]||0)<RC[rank])after.add(p);else rm.push(p);}
+        if(after.size!==before.size){for(const p of rm)k.notes.push('elim '+p);k.possible=after;ch=true;if(after.size===1)k.notes.push('=>'+[...after][0]);}
       }
-      if (!matched) throw new Error('clue must match at least one tile');
-      this.clueTokens--; this.cluesGiven++;
-      this.log.push({type:'clue', text:`P${p} → P${action.target}: ${action.clueType}=${action.value}`});
-      this.runElimination();
-    } else if (action.kind === 'discard') {
-      if (this.clueTokens >= MAX_CLUES) throw new Error("can't discard with 8 clues");
-      const card = this.hands[p].splice(action.idx,1)[0];
-      this.knowledge[p].splice(action.idx,1);
-      this.discardPile.push(card);
-      this.clueTokens = Math.min(MAX_CLUES, this.clueTokens+1);
-      this.discardsMade++;
-      this.log.push({type:'discard', text:`P${p} discards ${card.color[0]}${card.rank}`});
-      this.runElimination(); this.drawReplacement(p);
-    } else if (action.kind === 'play') {
-      const card = this.hands[p].splice(action.idx,1)[0];
-      this.knowledge[p].splice(action.idx,1);
-      if (this.fireworks[card.color] === card.rank-1) {
-        this.fireworks[card.color] = card.rank;
-        this.log.push({type:'play_ok', text:`P${p} plays ${card.color[0]}${card.rank} ✓`});
-        if (card.rank===5) this.clueTokens = Math.min(MAX_CLUES, this.clueTokens+1);
-        if (this.score()===FIREWORK_TOTAL) { this.gameOver=true; this.result='win'; }
+    }
+  }
+  legal(p){
+    const a=[];
+    if(this.clues>0)for(let t=0;t<this.n;t++){if(t===p)continue;
+      for(const c of new Set(this.hands[t].map(x=>x.color)))a.push({kind:'clue',target:t,ct:'color',v:c});
+      for(const r of new Set(this.hands[t].map(x=>x.rank)))a.push({kind:'clue',target:t,ct:'rank',v:r});}
+    if(this.clues<MAX_C)for(let i=0;i<this.hands[p].length;i++)a.push({kind:'discard',idx:i});
+    for(let i=0;i<this.hands[p].length;i++)a.push({kind:'play',idx:i});
+    return a;
+  }
+  apply(p,action){
+    if(this.over)throw new Error('game over');
+    if(action.kind==='clue'){
+      if(this.clues<=0)throw new Error('no clue tokens');
+      if(action.target===p)throw new Error("can't clue yourself");
+      let hit=false;
+      for(let i=0;i<this.hands[action.target].length;i++){
+        const card=this.hands[action.target][i],k=this.know[action.target][i];
+        if(action.ct==='color'){const m=card.color===action.v;filterK(k,s=>(pairOf(s).color===action.v)===m,`color ${m?'IS':'NOT'} ${action.v}`);if(m)hit=true;}
+        else{const m=card.rank===action.v;filterK(k,s=>(pairOf(s).rank===action.v)===m,`rank ${m?'IS':'NOT'} ${action.v}`);if(m)hit=true;}
+      }
+      if(!hit)throw new Error('clue must touch at least one tile');
+      this.clues--;this.clueN++;
+      this.log.push({type:'clu',text:`P${p} → P${action.target}: ${action.ct}=${action.v}`});
+      this.elim();
+    } else if(action.kind==='discard'){
+      if(this.clues>=MAX_C)throw new Error("can't discard with 8 clues");
+      const card=this.hands[p].splice(action.idx,1)[0];this.know[p].splice(action.idx,1);
+      this.disc.push(card);this.clues=Math.min(MAX_C,this.clues+1);this.discN++;
+      this.log.push({type:'dis',text:`P${p} discards ${card.color[0]}${card.rank}`});
+      this.elim();this._rep(p);
+    } else if(action.kind==='play'){
+      const card=this.hands[p].splice(action.idx,1)[0];this.know[p].splice(action.idx,1);
+      if(this.fw[card.color]===card.rank-1){
+        this.fw[card.color]=card.rank;
+        this.log.push({type:'ok',text:`P${p} plays ${card.color[0]}${card.rank} ✓`});
+        if(card.rank===5)this.clues=Math.min(MAX_C,this.clues+1);
+        if(this.score()===FW_TOT){this.over=true;this.result='win';}
       } else {
-        this.discardPile.push(card);
-        this.strikes++;
-        this.log.push({type:'play_bad', text:`P${p} misplays ${card.color[0]}${card.rank} ✗ (${this.strikes}/${MAX_FUSES})`});
-        if (this.strikes>=MAX_FUSES) { this.gameOver=true; this.result='loss'; }
+        this.disc.push(card);this.strikes++;
+        this.log.push({type:'bad',text:`P${p} misplays ${card.color[0]}${card.rank} ✗ (${this.strikes}/${MAX_F})`});
+        if(this.strikes>=MAX_F){this.over=true;this.result='loss';}
       }
-      this.runElimination();
-      if (!this.gameOver) this.drawReplacement(p);
+      this.elim();if(!this.over)this._rep(p);
     }
   }
-  drawReplacement(p) {
-    if (this.deck.length > 0) {
-      this.drawToHand(p);
-      if (this.deck.length===0 && this.finalRoundLeft===null) this.finalRoundLeft = this.n+1;
-    }
+  _rep(p){if(this.deck.length>0){this._draw(p);if(this.deck.length===0&&this.finalLeft===null)this.finalLeft=this.n+1;}}
+  advance(){
+    this.turnN++;
+    if(this.finalLeft!==null){this.finalLeft--;if(this.finalLeft<=0&&!this.over){this.over=true;this.result=this.result||'deck_out';}}
+    this.turn=(this.turn+1)%this.n;
   }
-  advanceTurn() {
-    this.turnCount++;
-    if (this.finalRoundLeft !== null) {
-      this.finalRoundLeft--;
-      if (this.finalRoundLeft <= 0 && !this.gameOver) { this.gameOver=true; this.result=this.result||'deck_out'; }
-    }
-    this.currentPlayer = (this.currentPlayer+1) % this.n;
-  }
-  clone() {
-    const g = Object.create(HanabiGame.prototype);
-    g.n = this.n; g.h = this.h;
-    g.deck = this.deck.map(c=>({...c}));
-    g.hands = this.hands.map(h=>h.map(c=>({...c})));
-    g.knowledge = this.knowledge.map(h=>h.map(k=>({possible:new Set(k.possible),notes:[...k.notes]})));
-    g.discardPile = this.discardPile.map(c=>({...c}));
-    g.fireworks = {...this.fireworks};
-    g.clueTokens=this.clueTokens; g.strikes=this.strikes;
-    g.currentPlayer=this.currentPlayer; g.turnCount=this.turnCount;
-    g.finalRoundLeft=this.finalRoundLeft; g.gameOver=this.gameOver; g.result=this.result;
-    g.log=[]; g.discardsMade=this.discardsMade; g.cluesGiven=this.cluesGiven;
-    g.rng=this.rng;
+  clone(){
+    const g=Object.create(Game.prototype);
+    g.n=this.n;g.h=this.h;g.deck=this.deck.map(c=>({...c}));
+    g.hands=this.hands.map(h=>h.map(c=>({...c})));
+    g.know=this.know.map(h=>h.map(k=>({possible:new Set(k.possible),notes:[...k.notes]})));
+    g.disc=this.disc.map(c=>({...c}));g.fw={...this.fw};
+    g.clues=this.clues;g.strikes=this.strikes;g.turn=this.turn;g.turnN=this.turnN;
+    g.finalLeft=this.finalLeft;g.over=this.over;g.result=this.result;
+    g.log=[];g.discN=this.discN;g.clueN=this.clueN;g.rng=this.rng;
     return g;
   }
 }
 
-// ── BOT LOGIC ──
-function remainingCount(game, color, rank) {
-  let used = 0;
-  for (const c of game.discardPile) if (c.color===color && c.rank===rank) used++;
-  if (game.fireworks[color]>=rank) used++;
-  return RANK_COUNTS[rank] - used;
-}
-function isPlayable(possible, fw) { for (const p of possible) { const {color,rank}=pairOf(p); if (fw[color]!==rank-1) return false; } return true; }
-function isDead(possible, fw) { for (const p of possible) { const {color,rank}=pairOf(p); if (rank>fw[color]) return false; } return true; }
+// Bot
+function remCount(g,color,rank){let u=0;for(const c of g.disc)if(c.color===color&&c.rank===rank)u++;if(g.fw[color]>=rank)u++;return RC[rank]-u;}
+function isPlay(pos,fw){for(const p of pos){const{color,rank}=pairOf(p);if(fw[color]!==rank-1)return false;}return true;}
+function isDead(pos,fw){for(const p of pos){const{color,rank}=pairOf(p);if(rank>fw[color])return false;}return true;}
 
-function chooseAction(game, player, trace) {
-  trace = trace||[];
-  const hand=game.hands[player], know=game.knowledge[player];
-  // 1. play provably safe
-  for (let i=0; i<know.length; i++) {
-    if (isPlayable(know[i].possible, game.fireworks)) {
-      trace.push(`Slot ${i} is provably playable → PLAY`);
-      return {action:{kind:'play',idx:i},trace};
-    }
-  }
-  // 2. clue to enable play
-  if (game.clueTokens > 0) {
-    for (let off=1; off<game.n; off++) {
-      const t=(player+off)%game.n;
-      const tH=game.hands[t], tK=game.knowledge[t];
-      for (let i=0; i<tH.length; i++) {
-        const card=tH[i], k=tK[i];
-        if (isPlayable(k.possible,game.fireworks)) continue;
-        if (game.fireworks[card.color]!==card.rank-1) continue;
-        const tc=new Set([...k.possible].filter(p=>pairOf(p).color===card.color));
-        if (tc.size && isPlayable(tc,game.fireworks)) { trace.push(`Clue P${t} color=${card.color}`); return {action:{kind:'clue',target:t,clueType:'color',value:card.color},trace}; }
-        const tr=new Set([...k.possible].filter(p=>pairOf(p).rank===card.rank));
-        if (tr.size && isPlayable(tr,game.fireworks)) { trace.push(`Clue P${t} rank=${card.rank}`); return {action:{kind:'clue',target:t,clueType:'rank',value:card.rank},trace}; }
+function botAct(g,p,tr){
+  tr=tr||[];const hand=g.hands[p],know=g.know[p];
+  for(let i=0;i<know.length;i++)if(isPlay(know[i].possible,g.fw)){tr.push(`Play slot ${i} (provably safe)`);return{action:{kind:'play',idx:i},tr};}
+  if(g.clues>0){
+    for(let off=1;off<g.n;off++){const t=(p+off)%g.n,tH=g.hands[t],tK=g.know[t];
+      for(let i=0;i<tH.length;i++){const card=tH[i],k=tK[i];
+        if(isPlay(k.possible,g.fw)||g.fw[card.color]!==card.rank-1)continue;
+        const tc=new Set([...k.possible].filter(s=>pairOf(s).color===card.color));
+        if(tc.size&&isPlay(tc,g.fw)){tr.push(`Clue P${t} color=${card.color}`);return{action:{kind:'clue',target:t,ct:'color',v:card.color},tr};}
+        const tr2=new Set([...k.possible].filter(s=>pairOf(s).rank===card.rank));
+        if(tr2.size&&isPlay(tr2,g.fw)){tr.push(`Clue P${t} rank=${card.rank}`);return{action:{kind:'clue',target:t,ct:'rank',v:card.rank},tr};}
       }
     }
-    // 3. save clue
-    for (let off=1; off<game.n; off++) {
-      const t=(player+off)%game.n;
-      const tH=game.hands[t], tK=game.knowledge[t];
-      const chop=tK.findIndex(k=>isUntouched(k));
-      if (chop===-1) continue;
+    for(let off=1;off<g.n;off++){const t=(p+off)%g.n,tH=g.hands[t],tK=g.know[t];
+      const chop=tK.findIndex(k=>isUnt(k));if(chop===-1)continue;
       const card=tH[chop];
-      if ((card.rank===5 || remainingCount(game,card.color,card.rank)===1) && !isDead(tK[chop].possible,game.fireworks)) {
-        trace.push(`Save P${t} slot ${chop} (${card.color[0]}${card.rank})`);
-        return {action:{kind:'clue',target:t,clueType:'rank',value:card.rank},trace};
-      }
+      if((card.rank===5||remCount(g,card.color,card.rank)===1)&&!isDead(tK[chop].possible,g.fw)){
+        tr.push(`Save P${t} slot ${chop}`);return{action:{kind:'clue',target:t,ct:'rank',v:card.rank},tr};}
     }
   }
-  // 4. discard dead
-  if (game.clueTokens < MAX_CLUES) {
-    for (let i=0; i<know.length; i++) {
-      if (isDead(know[i].possible,game.fireworks)) { trace.push(`Discard dead slot ${i}`); return {action:{kind:'discard',idx:i},trace}; }
-    }
-    for (let i=0; i<know.length; i++) {
-      if (isUntouched(know[i])) { trace.push(`Discard chop slot ${i}`); return {action:{kind:'discard',idx:i},trace}; }
-    }
-    trace.push('Discard slot 0 (fallback)');
-    return {action:{kind:'discard',idx:0},trace};
+  if(g.clues<MAX_C){
+    for(let i=0;i<know.length;i++)if(isDead(know[i].possible,g.fw)){tr.push(`Discard dead slot ${i}`);return{action:{kind:'discard',idx:i},tr};}
+    for(let i=0;i<know.length;i++)if(isUnt(know[i])){tr.push(`Discard chop slot ${i}`);return{action:{kind:'discard',idx:i},tr};}
+    tr.push('Discard slot 0');return{action:{kind:'discard',idx:0},tr};
   }
-  const legal=game.legalActions(player).filter(a=>a.kind==='clue');
-  if (legal.length) { trace.push('Arbitrary clue (tokens full)'); return {action:legal[0],trace}; }
-  trace.push('Blind play slot 0');
-  return {action:{kind:'play',idx:0},trace};
+  const l=g.legal(p).filter(a=>a.kind==='clue');
+  if(l.length){tr.push('Arbitrary clue');return{action:l[0],tr};}
+  tr.push('Blind play slot 0');return{action:{kind:'play',idx:0},tr};
 }
 
-// ── WIN PROBABILITY (Monte Carlo) ──
-function estimateWinProbability(game, simCount=300) {
-  if (game.gameOver) { return game.result==='win' ? 1 : 0; }
-  let wins = 0;
-  for (let s=0; s<simCount; s++) {
-    const g = game.clone();
-    // shuffle remaining deck as the "unknown"
-    for (let i=g.deck.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [g.deck[i],g.deck[j]]=[g.deck[j],g.deck[i]]; }
-    let safety = 0;
-    while (!g.gameOver && safety++ < 300) {
-      const {action} = chooseAction(g, g.currentPlayer, null);
-      try { g.applyAction(g.currentPlayer, action); } catch(e) { break; }
-      g.advanceTurn();
-    }
-    if (g.result==='win') wins++;
+// Win probability
+function winProb(g,N=350){
+  if(g.over)return g.result==='win'?1:0;
+  let w=0;
+  for(let s=0;s<N;s++){
+    const gc=g.clone();
+    for(let i=gc.deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[gc.deck[i],gc.deck[j]]=[gc.deck[j],gc.deck[i]];}
+    let safe=0;
+    while(!gc.over&&safe++<250){const{action}=botAct(gc,gc.turn,null);try{gc.apply(gc.turn,action);}catch(e){break;}gc.advance();}
+    if(gc.result==='win')w++;
   }
-  return wins / simCount;
+  return w/N;
 }
 
-// run in small batches to avoid blocking
-let winProbTask = null;
-function scheduleWinProbUpdate() {
-  if (winProbTask) clearTimeout(winProbTask);
-  document.getElementById('win-computing').textContent = 'Computing…';
-  winProbTask = setTimeout(() => {
-    if (!game || game.gameOver) return;
-    const p = estimateWinProbability(game, 400);
-    const pct = Math.round(p*100);
-    document.getElementById('win-bar').style.width = pct+'%';
-    document.getElementById('win-pct-label').textContent = pct+'% win';
-    document.getElementById('win-score-label').textContent = `score ${game.score()}/25`;
-    document.getElementById('win-computing').textContent = `based on 400 simulations`;
-  }, 80);
-}
+// State
+let game=null,humans=new Set([0]),selSlot=null,clueMode=false,clueTarget=null,clueType=null,clueVal=null,thinkLines=[],lastShown=-1;
 
-// ── STATE ──
-var game = null, humanSeats = new Set([0]);
-var selectedSlot = null, clueMode = false, clueTarget = null, clueType = null, clueValue = null;
-var thinkingLines = [], lastShownPlayer = -1;
-
-// ── SETUP ──
-function renderSeatToggles() {
-  const n = parseInt(document.getElementById('player-count').value);
-  const el = document.getElementById('seat-toggles');
-  el.innerHTML = '';
-  for (let i=0; i<n; i++) {
-    const chip = document.createElement('div');
-    chip.className = 'seat-chip'+(humanSeats.has(i)?' on':'');
-    chip.textContent = `Player ${i}`;
-    chip.onclick = () => { humanSeats.has(i)?humanSeats.delete(i):humanSeats.add(i); renderSeatToggles(); };
-    el.appendChild(chip);
-  }
+// Setup
+function renderSeats(){
+  const n=parseInt(document.getElementById('pc').value);
+  const el=document.getElementById('seats');el.innerHTML='';
+  for(let i=0;i<n;i++){const ch=document.createElement('div');ch.className='seat-chip'+(humans.has(i)?' on':'');ch.textContent='P'+i;ch.onclick=()=>{humans.has(i)?humans.delete(i):humans.add(i);renderSeats();};el.appendChild(ch);}
 }
-document.getElementById('player-count').addEventListener('change', () => {
-  const n = parseInt(document.getElementById('player-count').value);
-  humanSeats = new Set([...humanSeats].filter(s=>s<n));
-  if (humanSeats.size===0) humanSeats.add(0);
-  renderSeatToggles();
+document.getElementById('pc').addEventListener('change',()=>{const n=parseInt(document.getElementById('pc').value);humans=new Set([...humans].filter(s=>s<n));if(humans.size===0)humans.add(0);renderSeats();});
+renderSeats();
+document.getElementById('startbtn').addEventListener('click',()=>{
+  if(humans.size===0){toast('Pick at least one human seat.',true);return;}
+  const n=parseInt(document.getElementById('pc').value);
+  const sv=document.getElementById('seed').value;
+  startGame(n,sv===''?null:parseInt(sv));
 });
-renderSeatToggles();
+document.getElementById('newgame-btn').addEventListener('click',()=>{document.getElementById('game').classList.remove('on');document.getElementById('setup').style.display='flex';});
 
-document.getElementById('start-btn').addEventListener('click', () => {
-  const n = parseInt(document.getElementById('player-count').value);
-  const seed = document.getElementById('seed-input').value;
-  if (humanSeats.size===0) { toast('Pick at least one human seat.', true); return; }
-  startGame(n, seed===''?null:parseInt(seed));
-});
-document.getElementById('restart-btn').addEventListener('click', () => {
-  document.getElementById('game').classList.remove('visible');
-  document.getElementById('setup').style.display='flex';
+// Sidebar tabs
+document.querySelectorAll('.sb-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.sb-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.sb-pane').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('pane-'+tab.dataset.pane).classList.add('active');
+  });
 });
 
-function startGame(n, seed) {
-  game = new HanabiGame(n, seed);
-  thinkingLines=[]; lastShownPlayer=-1;
-  selectedSlot=null; clueMode=false; clueTarget=null; clueType=null; clueValue=null;
+function startGame(n,seed){
+  game=new Game(n,seed);thinkLines=[];lastShown=-1;
+  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;
   document.getElementById('setup').style.display='none';
-  document.getElementById('game').classList.add('visible');
+  document.getElementById('game').classList.add('on');
   render();
 }
 
-// ── RENDERING ──
-function render() {
-  advanceUntilHumanOrOver();
-  if (game.gameOver) { renderGameOver(); return; }
-  const cp = game.currentPlayer;
-  if (humanSeats.size > 1 && cp !== lastShownPlayer) {
-    showPassOverlay(cp);
-  } else {
-    lastShownPlayer = cp;
-    renderAll();
+function render(){
+  runBots();
+  if(game.over){renderGameOver();return;}
+  const cp=game.turn;
+  if(humans.size>1&&cp!==lastShown){showPass(cp);}
+  else{lastShown=cp;renderAll();}
+}
+
+function runBots(){
+  while(!game.over&&!humans.has(game.turn)){
+    const p=game.turn;const{action,tr}=botAct(game,p,[]);
+    for(const l of tr)thinkLines.push(`(P${p}) ${l}`);
+    try{game.apply(p,action);}catch(e){}
+    thinkLines.push(`>> ${game.log[game.log.length-1]?.text}`);
+    if(thinkLines.length>300)thinkLines.splice(0,60);
+    game.advance();
   }
 }
 
-function advanceUntilHumanOrOver() {
-  while (!game.gameOver && !humanSeats.has(game.currentPlayer)) {
-    const player = game.currentPlayer;
-    const {action, trace} = chooseAction(game, player, []);
-    for (const line of trace) thinkingLines.push(`(P${player}) ${line}`);
-    try { game.applyAction(player, action); } catch(e) {}
-    thinkingLines.push(`>> ${game.log[game.log.length-1]?.text}`);
-    if (thinkingLines.length > 200) thinkingLines.splice(0, 50);
-    game.advanceTurn();
-  }
+let winTask=null;
+function scheduleWin(){
+  if(winTask)clearTimeout(winTask);
+  document.getElementById('wm-pct').textContent='…';
+  winTask=setTimeout(()=>{
+    if(!game||game.over)return;
+    const p=winProb(game,350);
+    const pct=Math.round(p*100);
+    document.getElementById('wm-fill').style.width=pct+'%';
+    document.getElementById('wm-pct').textContent=pct+'%';
+  },60);
 }
 
-function renderAll() {
-  renderHeader();
-  renderSidebar();
+function renderAll(){
+  renderTopBar();
   renderHands();
-  renderActionArea();
-  renderThinking();
-  scheduleWinProbUpdate();
+  renderAction();
+  renderSidebar();
+  scheduleWin();
 }
 
-function renderHeader() {
-  const el = document.getElementById('header-stats');
-  const clueHTML = Array.from({length:MAX_CLUES}, (_,i) =>
-    `<div class="token ${i<game.clueTokens?'clue-on':'clue-off'}"></div>`).join('');
-  const fuseHTML = Array.from({length:MAX_FUSES}, (_,i) =>
-    `<div class="token ${i<game.strikes?'fuse-on':'fuse-off'}"></div>`).join('');
-  el.innerHTML = `
-    <div class="stat"><span>Turn</span> <strong>${game.turnCount+1}</strong></div>
-    <div class="stat"><span>Deck</span> <strong>${game.deck.length}</strong></div>
-    <div class="stat"><div class="tokens-display">${clueHTML}</div></div>
-    <div class="stat"><div class="tokens-display">${fuseHTML}</div></div>
-    <div class="stat"><span>P<strong>${game.currentPlayer}</strong>'s turn</span></div>
-  `;
-}
-
-const FW_COLORS = {Red:'#c62828',Yellow:'#d4a017',Green:'#27ae60',Blue:'#1a6fb5',White:'#9a9690'};
-function renderSidebar() {
+const FW_COLORS=CHX;
+function renderTopBar(){
   // fireworks
-  document.getElementById('score-display').textContent = game.score();
-  const fwEl = document.getElementById('fireworks-grid');
-  fwEl.innerHTML = COLORS.map(c => {
-    const top = game.fireworks[c];
-    const pips = Array.from({length:5}, (_,i) => {
-      const filled = i < top;
-      return `<div class="fw-pip${filled?' filled':''}" style="${filled?'background:'+FW_COLORS[c]+';':''}" title="${c} ${i+1}"></div>`;
-    }).join('');
-    return `<div class="fw-row">
-      <div class="fw-color-dot" style="background:${FW_COLORS[c]}"></div>
-      <div class="fw-pips">${pips}</div>
-      <div class="fw-score" style="color:${FW_COLORS[c]}">${top}</div>
-    </div>`;
+  const fwEl=document.getElementById('tb-fw');
+  fwEl.innerHTML=COLORS.map(c=>{
+    const top=game.fw[c];
+    const pips=Array.from({length:5},(_,i)=>`<div class="fw-dot${i<top?' on':''}" style="${i<top?'background:'+FW_COLORS[c]+';':''}"></div>`).join('');
+    return`<div class="fw-stack"><div class="fw-label" style="color:${FW_COLORS[c]}">${c[0]} ${top}</div><div class="fw-pips-row">${pips}</div></div>`;
   }).join('');
-
-  // discard
-  const dEl = document.getElementById('discard-area');
-  if (game.discardPile.length === 0) { dEl.innerHTML = '<span style="font-size:12px;color:var(--ink3)">Empty</span>'; }
-  else {
-    const byColor = {}; for (const c of COLORS) byColor[c]=[];
-    for (const card of game.discardPile) byColor[card.color].push(card.rank);
-    dEl.innerHTML = COLORS.filter(c=>byColor[c].length>0).map(c => {
-      const ranks = byColor[c].slice().sort((a,b)=>a-b);
-      const tiles = ranks.map(r => makeTileHTML(c,r,true)).join('');
-      return `<div class="discard-color-group">
-        <div class="discard-color-label" style="color:${FW_COLORS[c]}">${c}</div>
-        <div class="discard-tiles">${tiles}</div>
-      </div>`;
-    }).join('');
-  }
-
-  // log
-  const lEl = document.getElementById('log-panel');
-  lEl.innerHTML = game.log.map((entry,i) =>
-    `<div class="log-line ${entry.type}"><span class="lnum">${i+1}.</span>${entry.text}</div>`
-  ).join('');
-  lEl.scrollTop = lEl.scrollHeight;
+  // tokens
+  const tEl=document.getElementById('tb-tok');
+  tEl.innerHTML=`<div class="tok-row"><span class="tok-label">Clues</span>${Array.from({length:MAX_C},(_,i)=>`<div class="tok ${i<game.clues?'c-on':'c-off'}"></div>`).join('')}</div>
+    <div class="tok-row"><span class="tok-label">Fuses</span>${Array.from({length:MAX_F},(_,i)=>`<div class="tok ${i<game.strikes?'f-on':'f-off'}"></div>`).join('')}</div>`;
+  // stats
+  document.getElementById('tb-stats').innerHTML=`<div class="tb-stat">Turn <strong>${game.turnN+1}</strong></div><div class="tb-stat">Deck <strong>${game.deck.length}</strong></div><div class="tb-stat">Score <strong>${game.score()}/25</strong></div>`;
 }
 
-function makeTileHTML(color, rank, small=false) {
-  const sz = small ? 'small' : '';
-  const gemSz = small ? 'width:18px;height:18px;font-size:10px' : 'width:32px;height:32px;font-size:16px';
-  const pips = Array.from({length:rank}, () =>
-    `<div class="pip" style="background:${FW_COLORS[color]}"></div>`).join('');
-  return `<div class="tile ${sz}">
-    <div class="tile-gem" style="${gemSz};background:${FW_COLORS[color]};color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,0.25),0 1px 3px rgba(0,0,0,0.3)">${rank}</div>
-    <div class="tile-pips">${pips}</div>
-  </div>`;
-}
-
-function renderHands() {
-  const el = document.getElementById('hands-section');
-  el.innerHTML = '';
-  const cp = game.currentPlayer;
-
-  for (let p=0; p<game.n; p++) {
-    const isOwn = (p===cp);
-    const isHuman = humanSeats.has(p);
-    const isClueTarget = clueMode && p!==cp;
-
-    const div = document.createElement('div');
-    div.className = 'player-row' + (p===cp?' active-player':'');
-
-    const header = document.createElement('div');
-    header.className = 'player-header';
-    const turnTag = p===cp ? '<span class="tag turn">Your turn</span>' : '';
-    const roleTag = `<span class="tag ${isHuman?'human':'bot'}">${isHuman?'Human':'Bot'}</span>`;
-    header.innerHTML = `<span class="player-name">Player ${p}</span>${turnTag}${roleTag}`;
-
-    // in clue mode, clicking a player name targets them
-    if (isClueTarget) {
-      header.style.cursor = 'pointer';
-      header.title = `Clue Player ${p}`;
-    }
-
-    div.appendChild(header);
-
-    const handDiv = document.createElement('div');
-    handDiv.className = 'hand';
-
-    for (let i=0; i<game.hands[p].length; i++) {
-      const card = game.hands[p][i];
-      const know = game.knowledge[p][i];
-
-      if (isOwn) {
-        // hidden tile
-        const tile = document.createElement('div');
-        tile.className = 'tile hidden' + (selectedSlot===i?' selected':'');
-        const pigeonhole = [...know.notes].filter(n=>n.startsWith('=>'));
-        const noteText = pigeonhole.length ? pigeonhole[pigeonhole.length-1].replace('=>','').trim() : '';
-        tile.innerHTML = `
-          <div class="hidden-emblem">⛩</div>
-          <div class="hidden-label">${describeKnowledge(know)}</div>
-          ${noteText?`<div class="tile-note">${noteText.slice(0,20)}</div>`:''}
-        `;
-        tile.onclick = () => { selectedSlot=(selectedSlot===i?null:i); clueMode=false; renderHands(); renderActionArea(); };
-        handDiv.appendChild(tile);
+function renderHands(){
+  const el=document.getElementById('hands');el.innerHTML='';
+  const cp=game.turn;
+  for(let p=0;p<game.n;p++){
+    const div=document.createElement('div');
+    div.className='player-row'+(p===cp?' active':'');
+    const isOwn=p===cp;
+    const hum=humans.has(p);
+    div.innerHTML=`<div class="player-header"><span class="player-name">Player ${p}</span>${p===cp?'<span class="tag turn">your turn</span>':''}${hum?'<span class="tag human">Human</span>':'<span class="tag bot">Bot</span>'}</div>`;
+    const hand=document.createElement('div');hand.className='hand';
+    for(let i=0;i<game.hands[p].length;i++){
+      const card=game.hands[p][i],k=game.know[p][i];
+      if(isOwn){
+        const t=document.createElement('div');
+        t.className='tile hidden'+(selSlot===i?' sel':'');
+        const pig=[...k.notes].filter(n=>n.startsWith('=>'));
+        const note=pig.length?pig[pig.length-1].replace('=>','').trim():'';
+        t.innerHTML=`<div class="h-emblem">⛩</div><div class="h-label">${descK(k)}</div>${note?`<div class="h-note">${note.slice(0,18)}</div>`:''}`;
+        t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands();renderAction();};
+        hand.appendChild(t);
       } else {
-        // visible tile
-        const tile = document.createElement('div');
-        const highlighted = clueMode && clueTarget===p && clueType && (
-          (clueType==='color' && card.color===clueValue) ||
-          (clueType==='rank' && card.rank===clueValue)
-        );
-        const dimmed = clueMode && clueTarget===p && clueType && !highlighted;
-        tile.className = 'tile' + (clueMode?' clueable':'') + (highlighted?' clue-highlighted':'') + (dimmed?' clue-dimmed':'');
-        tile.innerHTML = `
-          <div class="tile-gem" style="width:32px;height:32px;font-size:16px;background:${FW_COLORS[card.color]};color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,0.25),0 1px 3px rgba(0,0,0,0.3)">${card.rank}</div>
-          <div class="tile-pips">${Array.from({length:card.rank},()=>`<div class="pip" style="background:${FW_COLORS[card.color]}"></div>`).join('')}</div>
-        `;
-        if (clueMode && p!==cp) {
-          tile.onclick = () => {
-            // clicking a tile: auto-select that player and toggle color/rank
-            clueTarget = p;
-            renderActionArea();
-            // don't set clue type here — let user pick from the panel
-          };
-        }
-        handDiv.appendChild(tile);
+        const hl=clueMode&&clueTarget===p&&clueType&&((clueType==='color'&&card.color===clueVal)||(clueType==='rank'&&card.rank===clueVal));
+        const dm=clueMode&&clueTarget===p&&clueType&&!hl;
+        const t=document.createElement('div');
+        t.className='tile'+(clueMode?' clueable':'')+(hl?' hl':'')+(dm?' dim':'');
+        t.innerHTML=tileInner(card.color,card.rank);
+        if(clueMode&&p!==cp){t.onclick=()=>{clueTarget=p;renderAction();renderHands();};}
+        hand.appendChild(t);
       }
     }
-
-    div.appendChild(handDiv);
-
-    // clue target selector (visible below hand when in clue mode)
-    if (isClueTarget) {
-      div.onclick = (e) => {
-        if (e.target.classList.contains('tile') || e.target.closest('.tile')) return;
-        clueTarget = p; clueType=null; clueValue=null; renderActionArea(); renderHands();
-      };
+    if(clueMode&&p!==cp){
+      div.style.cursor='pointer';
+      div.onclick=(e)=>{if(!e.target.classList.contains('tile')&&!e.target.closest('.tile')){clueTarget=p;clueType=null;clueVal=null;renderAction();renderHands();}};
     }
-
-    el.appendChild(div);
+    div.appendChild(hand);el.appendChild(div);
   }
 }
 
-function renderActionArea() {
-  const el = document.getElementById('action-area');
-  el.innerHTML = '';
-  const cp = game.currentPlayer;
-  if (!humanSeats.has(cp)) return;
+function tileInner(color,rank){
+  const pips=Array.from({length:rank},()=>`<div class="pip" style="background:${CHX[color]}"></div>`).join('');
+  return`<div class="tile-gem" style="width:30px;height:30px;font-size:15px;background:${CHX[color]};color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,.22),0 1px 3px rgba(0,0,0,.35)">${rank}</div><div class="tile-pips">${pips}</div>`;
+}
 
-  const panel = document.createElement('div');
-  panel.className = 'action-panel';
-
-  if (clueMode) {
-    renderCluePanel(panel);
-  } else {
-    renderMovePanel(panel);
-  }
+function renderAction(){
+  const el=document.getElementById('action');el.innerHTML='';
+  const cp=game.turn;if(!humans.has(cp))return;
+  const panel=document.createElement('div');panel.className='action-panel';
+  if(clueMode)renderClue(panel); else renderMove(panel);
   el.appendChild(panel);
 }
 
-function renderMovePanel(panel) {
-  const cp = game.currentPlayer;
-  panel.innerHTML = `<div class="action-title">Your move</div>
-    <div class="action-hint">${selectedSlot===null ? 'Click a tile in your hand above to select it.' : `Slot ${selectedSlot} selected.`}</div>`;
-
-  const row = document.createElement('div');
-  row.className = 'action-row';
-
-  const playBtn = document.createElement('button');
-  playBtn.className = 'btn-sm';
-  playBtn.textContent = '▶ Play tile';
-  playBtn.disabled = selectedSlot===null;
-  playBtn.onclick = () => doAction({kind:'play',idx:selectedSlot});
-  row.appendChild(playBtn);
-
-  const discardBtn = document.createElement('button');
-  discardBtn.className = 'btn-sm danger';
-  discardBtn.textContent = '✕ Discard tile';
-  discardBtn.disabled = selectedSlot===null || game.clueTokens>=MAX_CLUES;
-  discardBtn.title = game.clueTokens>=MAX_CLUES ? "Can't discard with 8 clues available" : '';
-  discardBtn.onclick = () => doAction({kind:'discard',idx:selectedSlot});
-  row.appendChild(discardBtn);
-
-  const clueBtn = document.createElement('button');
-  clueBtn.className = 'btn-sm';
-  clueBtn.textContent = '💬 Give clue';
-  clueBtn.disabled = game.clueTokens<=0;
-  clueBtn.onclick = () => { clueMode=true; clueTarget=null; clueType=null; clueValue=null; selectedSlot=null; renderHands(); renderActionArea(); };
-  row.appendChild(clueBtn);
-
-  const adviceBtn = document.createElement('button');
-  adviceBtn.className = 'btn-sm';
-  adviceBtn.textContent = '💡 Advice';
-  adviceBtn.onclick = () => showAdvice(panel);
-  row.appendChild(adviceBtn);
-
+function renderMove(panel){
+  const cp=game.turn;
+  panel.innerHTML=`<div class="ap-title">Your move</div><div class="ap-hint">${selSlot===null?'Click a tile in your hand to select it.':'Slot '+selSlot+' selected.'}</div>`;
+  const row=document.createElement('div');row.className='ap-row';
+  const pb=document.createElement('button');pb.className='btn';pb.textContent='▶ Play';pb.disabled=selSlot===null;pb.onclick=()=>doAction({kind:'play',idx:selSlot});row.appendChild(pb);
+  const db=document.createElement('button');db.className='btn danger';db.textContent='✕ Discard';db.disabled=selSlot===null||game.clues>=MAX_C;db.title=game.clues>=MAX_C?"Can't discard with 8 clues":'';db.onclick=()=>doAction({kind:'discard',idx:selSlot});row.appendChild(db);
+  const cb=document.createElement('button');cb.className='btn';cb.textContent='💬 Clue';cb.disabled=game.clues<=0;cb.onclick=()=>{clueMode=true;clueTarget=null;clueType=null;clueVal=null;selSlot=null;renderHands();renderAction();};row.appendChild(cb);
+  const ab=document.createElement('button');ab.className='btn';ab.textContent='💡 Advice';ab.onclick=()=>showAdvice(panel);row.appendChild(ab);
   panel.appendChild(row);
 }
 
-function renderCluePanel(panel) {
-  const cp = game.currentPlayer;
-  const targetHand = clueTarget!==null ? game.hands[clueTarget] : null;
-  const colorsPresent = targetHand ? new Set(targetHand.map(c=>c.color)) : new Set();
-  const ranksPresent = targetHand ? new Set(targetHand.map(c=>c.rank)) : new Set();
-
-  panel.innerHTML = `<div class="action-title">Give a clue</div>`;
-
-  const inst = document.createElement('div');
-  inst.className = 'clue-mode-instructions';
-  inst.textContent = clueTarget===null
-    ? 'Click on a player\'s hand (or their row) to select them as the clue target.'
-    : `Cluing Player ${clueTarget}. Pick a color or rank below, then send.`;
-  panel.appendChild(inst);
-
-  if (clueTarget !== null) {
-    // color swatches
-    const typeRow = document.createElement('div');
-    typeRow.className = 'clue-type-row';
-    typeRow.innerHTML = '<span class="clue-type-label">Color:</span>';
-    for (const c of COLORS) {
-      const sw = document.createElement('div');
-      sw.className = 'color-swatch' + (!colorsPresent.has(c)?' unavail':'') + (clueType==='color'&&clueValue===c?' chosen':'');
-      sw.style.background = FW_COLORS[c];
-      sw.title = c;
-      if (colorsPresent.has(c)) sw.onclick = () => { clueType='color'; clueValue=c; renderHands(); renderActionArea(); };
-      typeRow.appendChild(sw);
-    }
-    typeRow.innerHTML += '<span class="clue-type-label" style="margin-left:12px">Rank:</span>';
-    for (let r=1; r<=5; r++) {
-      const rb = document.createElement('button');
-      rb.className = 'rank-btn' + (clueType==='rank'&&clueValue===r?' chosen':'');
-      rb.textContent = r;
-      rb.disabled = !ranksPresent.has(r);
-      if (ranksPresent.has(r)) rb.onclick = () => { clueType='rank'; clueValue=r; renderHands(); renderActionArea(); };
-      typeRow.appendChild(rb);
-    }
-    panel.appendChild(typeRow);
+function renderClue(panel){
+  const cp=game.turn;
+  panel.innerHTML=`<div class="ap-title">Give a clue</div>`;
+  const box=document.createElement('div');box.className='clue-box';
+  box.textContent=clueTarget===null?'Click a player\'s row or tiles to target them.':clueType===null?`Player ${clueTarget} selected — pick a color or rank.`:`Player ${clueTarget}: ${clueType}=${clueVal}. Send or change.`;
+  panel.appendChild(box);
+  if(clueTarget!==null){
+    const tH=game.hands[clueTarget];
+    const cp2=new Set(tH.map(c=>c.color)),rp=new Set(tH.map(c=>c.rank));
+    const pr=document.createElement('div');pr.className='clue-pick';
+    pr.innerHTML='<span class="clue-pick-label">Color</span>';
+    for(const c of COLORS){const sw=document.createElement('div');sw.className='cswatch'+(clueType==='color'&&clueVal===c?' on':'')+(cp2.has(c)?'':' na');sw.style.background=CHX[c];sw.title=c;if(cp2.has(c))sw.onclick=()=>{clueType='color';clueVal=c;renderHands();renderAction();};pr.appendChild(sw);}
+    pr.innerHTML+='<span class="clue-pick-label" style="margin-left:10px">Rank</span>';
+    for(let r=1;r<=5;r++){const rb=document.createElement('button');rb.className='rbtn'+(clueType==='rank'&&clueVal===r?' on':'');rb.textContent=r;rb.disabled=!rp.has(r);if(rp.has(r))rb.onclick=()=>{clueType='rank';clueVal=r;renderHands();renderAction();};pr.appendChild(rb);}
+    panel.appendChild(pr);
   }
-
-  const row = document.createElement('div');
-  row.className = 'action-row';
-
-  const sendBtn = document.createElement('button');
-  sendBtn.className = 'btn-sm';
-  sendBtn.textContent = '✓ Send clue';
-  sendBtn.disabled = clueTarget===null || clueType===null;
-  sendBtn.onclick = () => doAction({kind:'clue',target:clueTarget,clueType,value:clueValue});
-  row.appendChild(sendBtn);
-
-  const cancelBtn = document.createElement('button');
-  cancelBtn.className = 'btn-sm';
-  cancelBtn.textContent = '✕ Cancel';
-  cancelBtn.onclick = () => { clueMode=false; clueTarget=null; clueType=null; clueValue=null; renderHands(); renderActionArea(); };
-  row.appendChild(cancelBtn);
-
+  const row=document.createElement('div');row.className='ap-row';
+  const sb=document.createElement('button');sb.className='btn';sb.textContent='✓ Send';sb.disabled=clueTarget===null||clueType===null;sb.onclick=()=>doAction({kind:'clue',target:clueTarget,ct:clueType,v:clueVal});row.appendChild(sb);
+  const xb=document.createElement('button');xb.className='btn';xb.textContent='✕ Cancel';xb.onclick=()=>{clueMode=false;clueTarget=null;clueType=null;clueVal=null;renderHands();renderAction();};row.appendChild(xb);
   panel.appendChild(row);
 }
 
-function showAdvice(panel) {
-  const cp = game.currentPlayer;
-  const {lines, suggestion} = recommendAction(game, cp);
-  const advDiv = document.createElement('div');
-  advDiv.className = 'advice-block';
-  advDiv.style.marginTop = '14px';
-
-  const rows = lines.filter(l=>l.trim()).map(l => `<tr><td colspan="2">${l}</td></tr>`).join('');
-  advDiv.innerHTML = `<table class="advice-table"><tbody>${rows}</tbody></table>`;
-
-  const applyBtn = document.createElement('button');
-  applyBtn.className = 'btn-sm';
-  applyBtn.style.marginTop = '10px';
-  applyBtn.textContent = '→ Apply suggestion';
-  applyBtn.onclick = () => doAction(suggestion);
-  advDiv.appendChild(applyBtn);
-
-  // remove old advice if any
-  const old = panel.querySelector('.advice-block');
-  if (old) old.remove();
-  panel.appendChild(advDiv);
-}
-
-function slotProbabilities(game, player, slotIdx) {
-  const k = game.knowledge[player][slotIdx];
-  const acc = game.accountedCounts();
-  const weights = {}; let total = 0;
-  for (const p of k.possible) {
-    const {rank}=pairOf(p);
-    const w = RANK_COUNTS[rank]-(acc[p]||0);
-    if (w>0) { weights[p]=w; total+=w; }
-  }
-  const probs = {};
-  for (const p in weights) probs[p] = weights[p]/total;
-  return probs;
-}
-
-function recommendAction(game, player) {
-  const lines = [];
-  const hand = game.knowledge[player];
-  const analysis = hand.map((k,i) => {
-    const probs = slotProbabilities(game,player,i);
-    let pPlay=0, pCrit=0;
-    for (const p in probs) {
-      const {color,rank}=pairOf(p);
-      if (game.fireworks[color]===rank-1) pPlay+=probs[p];
-      if (rank>game.fireworks[color] && remainingCount(game,color,rank)<=1) pCrit+=probs[p];
-    }
-    return {slot:i, pPlay, pCrit};
+function showAdvice(panel){
+  const cp=game.turn;const know=game.know[cp];
+  const acc=game.accCounts();
+  const rows=know.map((k,i)=>{
+    const weights={};let tot=0;
+    for(const p of k.possible){const{rank}=pairOf(p);const w=RC[rank]-(acc[p]||0);if(w>0){weights[p]=w;tot+=w;}}
+    let pp=0,pc=0;
+    for(const p in weights){const pr=weights[p]/tot;const{color,rank}=pairOf(p);if(game.fw[color]===rank-1)pp+=pr;if(rank>game.fw[color]&&remCount(game,color,rank)<=1)pc+=pr;}
+    return{i,pp,pc};
   });
-  lines.push('Play chance per slot:');
-  for (const a of analysis) lines.push(`  slot ${a.slot}: ${(a.pPlay*100).toFixed(0)}%${a.pPlay>=0.999?' ✓ certain':''}`);
-  const {action:botAction, trace} = chooseAction(game, player, []);
-  lines.push('');
-  lines.push('Bot would: '+trace[trace.length-1]);
-  return {lines, suggestion:botAction};
+  const{action:ba,tr}=botAct(game,cp,[]);
+  const old=panel.querySelector('.advice-rows');if(old)old.remove();
+  const div=document.createElement('div');div.className='advice-rows';
+  div.innerHTML=rows.map(r=>`<div class="adv-row"><span>Slot ${r.i}</span><span>Play <strong>${(r.pp*100).toFixed(0)}%</strong> · Crit discard <strong>${(r.pc*100).toFixed(0)}%</strong></span></div>`).join('');
+  div.innerHTML+=`<div class="adv-rec">Bot would: ${tr[tr.length-1]||'?'}</div>`;
+  const applyBtn=document.createElement('button');applyBtn.className='btn';applyBtn.style.marginTop='8px';applyBtn.textContent='→ Apply';applyBtn.onclick=()=>doAction(ba);
+  div.appendChild(applyBtn);
+  panel.appendChild(div);
 }
 
-function doAction(action) {
-  try {
-    game.applyAction(game.currentPlayer, action);
-  } catch(e) {
-    toast(e.message, true); return;
+function renderSidebar(){
+  renderDiscard();
+  renderLog();
+  renderTrace();
+}
+
+function renderDiscard(){
+  const el=document.getElementById('pane-discard');
+  if(game.disc.length===0){el.innerHTML='<div class="disc-empty">No discards yet.</div>';return;}
+  const byColor={};for(const c of COLORS)byColor[c]=[];
+  for(const card of game.disc)byColor[card.color].push(card.rank);
+  el.innerHTML='';
+  for(const color of COLORS){
+    const ranks=byColor[color];if(ranks.length===0)continue;
+    const group=document.createElement('div');group.className='disc-group';
+    group.innerHTML=`<div class="disc-color-header"><div class="disc-color-bar" style="background:${CHX[color]}"></div><div class="disc-color-name" style="color:${CHX[color]}">${color}</div></div>`;
+    const tilesDiv=document.createElement('div');tilesDiv.className='disc-tiles';
+    const sorted=ranks.slice().sort((a,b)=>a-b);
+    for(const rank of sorted){
+      const total=RC[rank];
+      const discardedOfThis=sorted.filter(r=>r===rank).length;
+      const remaining=total-discardedOfThis-(game.fw[color]>=rank?1:0);
+      const isCritical=remaining<=0;
+      const isLast=remaining===1;
+      const dt=document.createElement('div');
+      dt.className='disc-tile'+(isCritical?' critical':isLast?' last':'');
+      dt.title=`${color} ${rank} — ${remaining<=0?'eliminated!':remaining===1?'last copy!':remaining+' left'}`;
+      const pips=Array.from({length:rank},()=>`<div class="disc-pip" style="background:${CHX[color]}"></div>`).join('');
+      dt.innerHTML=`<div class="disc-gem" style="background:${CHX[color]};color:#fff">${rank}</div><div class="disc-pips">${pips}</div>`;
+      tilesDiv.appendChild(dt);
+    }
+    group.appendChild(tilesDiv);
+    el.appendChild(group);
   }
-  game.advanceTurn();
-  selectedSlot=null; clueMode=false; clueTarget=null; clueType=null; clueValue=null;
+  // legend
+  const leg=document.createElement('div');
+  leg.style.cssText='margin-top:10px;font-size:10px;color:var(--ink3);border-top:1px solid var(--border);padding-top:8px;display:flex;flex-direction:column;gap:3px;';
+  leg.innerHTML='<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;outline:2px solid #c0392b;outline-offset:1px;display:inline-block"></span>eliminated</span><span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;outline:2px solid #d4a017;outline-offset:1px;display:inline-block"></span>last copy</span>';
+  el.appendChild(leg);
+}
+
+function renderLog(){
+  const el=document.getElementById('pane-log');
+  if(game.log.length===0){el.innerHTML='<div style="font-size:11px;color:var(--ink3);font-style:italic">No moves yet.</div>';return;}
+  el.innerHTML=game.log.map((e,i)=>`<div class="log-line ${e.type}"><span class="n">${i+1}.</span>${e.text}</div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+function renderTrace(){
+  const el=document.getElementById('pane-trace');
+  el.innerHTML=thinkLines.slice(-60).map(l=>`<div class="trace-line">${l}</div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+function doAction(action){
+  try{game.apply(game.turn,action);}catch(e){toast(e.message,true);return;}
+  game.advance();selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;
   render();
 }
 
-function renderThinking() {
-  const area = document.getElementById('think-area');
-  const panel = document.getElementById('think-panel');
-  if (thinkingLines.length===0) { area.style.display='none'; return; }
-  area.style.display='block';
-  panel.innerHTML = thinkingLines.slice(-40).map(l=>`<div class="think-line">${l}</div>`).join('');
-  panel.scrollTop = panel.scrollHeight;
-}
-
-function renderGameOver() {
-  renderSidebar();
-  renderHeader();
-  document.getElementById('action-area').innerHTML='';
-  document.getElementById('hands-section').innerHTML='';
-
-  const banner = document.getElementById('banner-area');
-  const cls = game.result==='win'?'win':game.result==='loss'?'loss':'deck_out';
-  const msg = game.result==='win'
-    ? `🎆 Perfect game! Score ${game.score()}/25`
-    : game.result==='loss'
-    ? `💥 3 strikes. Final score ${game.score()}/25`
-    : `🃏 Deck exhausted. Final score ${game.score()}/25`;
-
-  const winPct = game.score()>=25 ? 100 : Math.round(game.score()/25*100);
-  document.getElementById('win-bar').style.width = winPct+'%';
-  document.getElementById('win-pct-label').textContent = `${game.score()}/25`;
-  document.getElementById('win-computing').textContent = 'Game over';
-
-  banner.innerHTML = `<div class="game-over-banner ${cls}">
-    <h2>${msg}</h2>
-    <p>${game.turnCount} turns · ${game.discardsMade} discards · ${game.cluesGiven} clues</p>
-    <button class="btn-primary" style="width:auto;margin-top:16px;padding:10px 28px" onclick="document.getElementById('game').classList.remove('visible');document.getElementById('setup').style.display='flex'">Play again</button>
-  </div>`;
-
-  // show all hands face up
-  const handsEl = document.getElementById('hands-section');
-  for (let p=0; p<game.n; p++) {
-    const div = document.createElement('div');
-    div.className = 'player-row';
-    div.innerHTML = `<div class="player-header"><span class="player-name">Player ${p}</span></div>`;
-    const hand = document.createElement('div');
-    hand.className = 'hand';
-    for (const card of game.hands[p]) {
-      hand.innerHTML += makeTileHTML(card.color, card.rank, false);
-    }
-    div.appendChild(hand);
-    handsEl.appendChild(div);
+function renderGameOver(){
+  renderTopBar();renderSidebar();
+  document.getElementById('action').innerHTML='';
+  document.getElementById('hands').innerHTML='';
+  const cls=game.result==='win'?'win':game.result==='loss'?'loss':'deck_out';
+  const msg=game.result==='win'?`🎆 Perfect! Score ${game.score()}/25`:game.result==='loss'?`💥 3 strikes. Score ${game.score()}/25`:`🃏 Deck out. Score ${game.score()}/25`;
+  document.getElementById('banner').innerHTML=`<div class="go-banner ${cls}"><h2>${msg}</h2><p>${game.turnN} turns · ${game.discN} discards · ${game.clueN} clues</p><button class="btn-go" style="width:auto;padding:10px 26px;margin-top:14px" onclick="document.getElementById('game').classList.remove('on');document.getElementById('setup').style.display='flex'">Play again</button></div>`;
+  const hands=document.getElementById('hands');
+  for(let p=0;p<game.n;p++){
+    const div=document.createElement('div');div.className='player-row';
+    div.innerHTML=`<div class="player-header"><span class="player-name">Player ${p}</span></div>`;
+    const hand=document.createElement('div');hand.className='hand';
+    for(const card of game.hands[p]){const t=document.createElement('div');t.className='tile';t.innerHTML=tileInner(card.color,card.rank);hand.appendChild(t);}
+    div.appendChild(hand);hands.appendChild(div);
   }
+  const wp=game.score()/25;
+  document.getElementById('wm-fill').style.width=Math.round(wp*100)+'%';
+  document.getElementById('wm-pct').textContent=game.score()+'/25';
 }
 
-function showPassOverlay(player) {
-  document.getElementById('pass-title').textContent = `Player ${player}'s turn`;
-  document.getElementById('pass-sub').textContent = `Pass the device to Player ${player}, then tap Ready.`;
-  const ov = document.getElementById('pass-overlay');
-  ov.style.display='flex';
-  document.getElementById('pass-btn').onclick = () => {
-    ov.style.display='none';
-    lastShownPlayer=player;
-    renderAll();
-  };
+function showPass(p){
+  document.getElementById('ov-title').textContent=`Player ${p}'s turn`;
+  document.getElementById('ov-sub').textContent=`Pass the device to Player ${p}, then tap Ready.`;
+  document.getElementById('overlay').style.display='flex';
+  document.getElementById('ov-btn').onclick=()=>{document.getElementById('overlay').style.display='none';lastShown=p;renderAll();};
 }
 
-function toast(msg, isError=false) {
-  const c = document.getElementById('toast-container');
-  const t = document.createElement('div');
-  t.className='toast'+(isError?' error':'');
-  t.textContent=msg;
-  c.appendChild(t);
-  setTimeout(()=>t.remove(), 3000);
+function toast(msg,err=false){
+  const c=document.getElementById('toasts');const t=document.createElement('div');
+  t.className='toast'+(err?' err':'');t.textContent=msg;c.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
 }
 </script>
 </body>
