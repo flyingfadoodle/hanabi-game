@@ -5,203 +5,595 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hanabi Deluxe II</title>
 <style>
-  :root {
-    --red: #c62828; --red-bg: #fdecea;
-    --yellow: #f9a825; --yellow-bg: #fff8e1;
-    --green: #2e7d32; --green-bg: #e8f5e9;
-    --blue: #1565c0; --blue-bg: #e3f2fd;
-    --white: #616161; --white-bg: #fafafa;
-    --bg: #f4f3ef; --panel: #ffffff; --ink: #262521; --muted: #7a776d;
-    --border: #ddd9cd; --accent: #3c3489;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--ink); line-height: 1.5;
-  }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 20px 60px; }
-  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
-  .sub { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
-  .panel {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
-    padding: 20px; margin-bottom: 16px;
-  }
-  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-  select, button, input {
-    font-family: inherit; font-size: 14px; padding: 8px 14px; border-radius: 8px;
-    border: 1px solid var(--border); background: #fff; color: var(--ink); cursor: pointer;
-  }
-  button:hover { background: #f0efe9; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  button.primary:hover { background: #2d276b; }
-  .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
-  .seat-toggles { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
-  .seat-chip {
-    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
-    font-size: 13px; cursor: pointer; user-select: none;
-  }
-  .seat-chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .board-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  .fireworks { display: flex; gap: 8px; }
-  .tokens { display: flex; gap: 6px; align-items: center; }
-  .token { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border); }
-  .token.clue-on { background: #4a90d9; border-color: #4a90d9; }
-  .token.clue-off { background: #e5e3da; }
-  .token.fuse-on { background: #d9534f; border-color: #d9534f; }
-  .token.fuse-off { background: #e5e3da; }
-  .meta-row { display: flex; gap: 20px; font-size: 13px; color: var(--muted); margin-top: 10px; flex-wrap: wrap; }
-  .discard-caption { font-size: 13px; color: var(--muted); margin-top: 10px; margin-bottom: 4px; }
-  .discard-groups { display: flex; flex-direction: column; gap: 6px; }
-  .discard-group { display: flex; align-items: center; gap: 6px; }
-  .discard-group-label { width: 56px; font-size: 12px; color: var(--muted); flex-shrink: 0; }
-  .discard-group-tiles { display: flex; gap: 4px; flex-wrap: wrap; }
-  .hand-block { margin-bottom: 14px; }
-  .hand-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-  .hand-title .turn-tag { background: var(--accent); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
-  .hand { display: flex; gap: 8px; flex-wrap: wrap; }
+:root {
+  --red: #c0392b; --red-light: #fdf0ef; --red-mid: #e8b4b0;
+  --yellow: #d4a017; --yellow-light: #fdf8e8; --yellow-mid: #e8d4a0;
+  --green: #27ae60; --green-light: #edfaf3; --green-mid: #a8dfc0;
+  --blue: #1a6fb5; --blue-light: #eff6fd; --blue-mid: #a8c8e8;
+  --white: #7f8c8d; --white-light: #f8f9f9; --white-mid: #c8cccf;
+  --bg: #1a1814;
+  --surface: #242019;
+  --surface2: #2e2920;
+  --border: #3a342a;
+  --border2: #4a4238;
+  --ink: #f0ead8;
+  --ink2: #b8ae98;
+  --ink3: #7a7060;
+  --accent: #c8a050;
+  --accent2: #a07830;
+  --win: #27ae60;
+  --loss: #c0392b;
+  --radius: 10px;
+  --tile-w: 62px;
+  --tile-h: 84px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
 
-  .tile {
-    width: 58px; height: 78px; border-radius: 7px; position: relative; cursor: default;
-    background: linear-gradient(180deg, #fdf9ef 0%, #f4ecd8 100%);
-    border: 1px solid #d9cca3;
-    box-shadow: 0 2px 0 #d9cca3, 0 5px 6px rgba(60, 45, 10, 0.22);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-  }
-  .tile.small { width: 34px; height: 46px; border-radius: 5px; gap: 3px; box-shadow: 0 1px 0 #d9cca3, 0 2px 3px rgba(60, 45, 10, 0.2); }
-  .tile.empty-slot {
-    background: repeating-linear-gradient(45deg, #eee9db, #eee9db 5px, #e4ded0 5px, #e4ded0 10px);
-    box-shadow: none; border: 1px dashed #cac0a4;
-  }
-  .tile.selectable { cursor: pointer; }
-  .tile.selected { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* ── SETUP ── */
+#setup {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.setup-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 460px;
+}
+.setup-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.setup-sub {
+  color: var(--ink3);
+  margin-bottom: 32px;
+  font-size: 13px;
+}
+.field { margin-bottom: 20px; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink3);
+  margin-bottom: 8px;
+}
+.field select, .field input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 14px;
+  padding: 10px 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field select:focus, .field input:focus { border-color: var(--accent); }
+.seat-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.seat-chip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--surface2);
+  color: var(--ink2);
+  transition: all 0.15s;
+}
+.seat-chip.on { background: var(--accent); color: #1a1208; border-color: var(--accent); font-weight: 600; }
+.btn-primary {
+  width: 100%;
+  background: var(--accent);
+  color: #1a1208;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+  transition: background 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: #d8b060; }
 
-  .tile-gem {
-    width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
-    justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0;
-  }
-  .tile.small .tile-gem { width: 18px; height: 18px; font-size: 10px; }
-  .tile-pips { display: flex; gap: 2px; }
-  .pip { width: 5px; height: 5px; border-radius: 50%; }
-  .tile.small .pip { width: 3px; height: 3px; }
+/* ── GAME LAYOUT ── */
+#game { display: none; flex-direction: column; min-height: 100vh; }
+#game.visible { display: flex; }
 
-  .tile.hidden-tile {
-    background: repeating-linear-gradient(45deg, #ece1bf, #ece1bf 6px, #e2d5a9 6px, #e2d5a9 12px);
-    border-color: #cbb787; color: #5c4a26; font-size: 10px; font-weight: 600;
-    text-align: center; padding: 5px; justify-content: flex-start; gap: 2px;
-  }
-  .tile.hidden-tile .back-emblem { font-size: 15px; opacity: 0.4; }
-  .tile .note { position: absolute; bottom: 3px; left: 3px; right: 3px; font-size: 8px; font-weight: 500; opacity: 0.8; line-height: 1.2; }
-  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-  .clue-target-list { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .clue-target { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; font-size: 13px; }
-  .clue-target.chosen { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .color-swatch-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-  .color-swatch { width: 34px; height: 34px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
-  .color-swatch.chosen { border-color: var(--ink); }
-  .rank-btn { width: 34px; height: 34px; border-radius: 8px; cursor: pointer; }
-  .rank-btn.chosen { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .log-panel { max-height: 220px; overflow-y: auto; font-size: 13px; }
-  .log-line { padding: 3px 0; border-bottom: 1px solid #efece2; color: var(--muted); }
-  .log-line .num { color: var(--ink); font-weight: 600; margin-right: 6px; }
-  .think-line { font-size: 12px; color: var(--muted); font-style: italic; padding: 2px 0; }
-  .advice-block { font-size: 13px; }
-  .advice-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #efece2; }
-  .banner { padding: 14px 18px; border-radius: 10px; font-weight: 600; margin-bottom: 16px; }
-  .banner.win { background: var(--green-bg); color: var(--green); }
-  .banner.loss { background: var(--red-bg); color: var(--red); }
-  .banner.deck_out { background: var(--blue-bg); color: var(--blue); }
-  .overlay {
-    position: fixed; inset: 0; background: rgba(20,18,14,0.85); display: flex;
-    align-items: center; justify-content: center; z-index: 50;
-  }
-  .overlay .card { background: #fff; padding: 40px; border-radius: 12px; text-align: center; max-width: 380px; }
-  .hidden { display: none !important; }
-  .small-muted { font-size: 12px; color: var(--muted); }
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.game-title { font-size: 15px; font-weight: 700; color: var(--accent); }
+.header-stats { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.stat { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink2); }
+.stat strong { color: var(--ink); font-weight: 600; }
+
+.tokens-display { display: flex; gap: 4px; align-items: center; }
+.token { width: 13px; height: 13px; border-radius: 50%; }
+.token.clue-on { background: #4a90d9; }
+.token.clue-off { background: var(--border2); }
+.token.fuse-on { background: var(--red); }
+.token.fuse-off { background: var(--border2); }
+
+.btn-sm {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--ink2);
+  border-radius: 7px;
+  font-size: 12px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-sm.danger { color: var(--red); border-color: var(--red); }
+.btn-sm.danger:hover { background: var(--red); color: #fff; }
+
+.game-body {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── LEFT SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 16px;
+  gap: 16px;
+}
+.sidebar-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+  margin-bottom: 10px;
+}
+
+/* fireworks */
+.fireworks-grid { display: flex; flex-direction: column; gap: 6px; }
+.fw-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fw-color-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.fw-pips { display: flex; gap: 3px; flex: 1; }
+.fw-pip {
+  width: 12px; height: 12px; border-radius: 3px;
+  border: 1px solid var(--border2);
+}
+.fw-pip.filled { border: none; }
+.fw-score { font-size: 13px; font-weight: 600; min-width: 20px; text-align: right; }
+.fw-total { font-size: 13px; color: var(--ink3); }
+
+/* win prob meter */
+.win-meter { }
+.win-bar-track {
+  height: 10px;
+  background: var(--surface2);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 8px 0 4px;
+  border: 1px solid var(--border);
+}
+.win-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--red), var(--yellow) 50%, var(--green));
+  transition: width 0.4s ease;
+  transform-origin: left;
+}
+.win-bar-label {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+}
+.win-computing { font-size: 11px; color: var(--ink3); font-style: italic; margin-top: 2px; }
+
+/* discard pile */
+.discard-section { }
+.discard-color-group { margin-bottom: 8px; }
+.discard-color-label {
+  font-size: 11px;
+  color: var(--ink3);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.discard-tiles { display: flex; gap: 4px; flex-wrap: wrap; }
+
+/* log */
+.log-scroll { max-height: 180px; overflow-y: auto; }
+.log-line { font-size: 12px; color: var(--ink3); padding: 2px 0; border-bottom: 1px solid var(--border); }
+.log-line .lnum { color: var(--ink2); font-weight: 600; margin-right: 4px; }
+.log-line.play-ok { color: var(--green-mid); }
+.log-line.play-bad { color: var(--red-mid); }
+.log-line.clue { color: #a0b8d8; }
+.log-line.discard { color: var(--ink3); }
+
+/* ── MAIN AREA ── */
+.main { overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+/* hands */
+.hands-section { display: flex; flex-direction: column; gap: 12px; }
+.player-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  transition: border-color 0.2s;
+}
+.player-row.active-player { border-color: var(--accent); }
+.player-row.clue-target-available { border-color: var(--border2); cursor: default; }
+.player-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.player-name { font-weight: 600; font-size: 14px; }
+.tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.tag.turn { background: var(--accent); color: #1a1208; }
+.tag.bot { background: var(--surface2); color: var(--ink3); border: 1px solid var(--border2); }
+.tag.human { background: #1a3050; color: #88b8e0; border: 1px solid #2a5080; }
+
+.hand { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+
+/* ── TILES ── */
+.tile {
+  width: var(--tile-w);
+  height: var(--tile-h);
+  border-radius: 8px;
+  border: 1px solid #5a4e34;
+  background: linear-gradient(160deg, #f5efd0 0%, #e8ddb0 100%);
+  box-shadow: 0 2px 0 #8a7840, 0 4px 8px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  position: relative;
+  cursor: default;
+  transition: transform 0.1s, box-shadow 0.1s;
+  flex-shrink: 0;
+}
+.tile.small {
+  width: 32px; height: 44px;
+  border-radius: 5px;
+  box-shadow: 0 1px 0 #8a7840, 0 2px 4px rgba(0,0,0,0.4);
+  gap: 3px;
+}
+.tile-gem {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.3);
+}
+.tile.small .tile-gem { width: 18px; height: 18px; font-size: 10px; }
+.tile-pips { display: flex; gap: 2px; }
+.pip { width: 5px; height: 5px; border-radius: 50%; opacity: 0.85; }
+.tile.small .pip { width: 3px; height: 3px; }
+
+/* hidden tile (current player's own hand) */
+.tile.hidden {
+  background: linear-gradient(160deg, #3a3020 0%, #2a2218 100%);
+  border-color: #5a4e2a;
+  box-shadow: 0 2px 0 #1a1610, 0 4px 8px rgba(0,0,0,0.6);
+  cursor: pointer;
+}
+.tile.hidden:hover { transform: translateY(-3px); box-shadow: 0 5px 0 #1a1610, 0 8px 12px rgba(0,0,0,0.6); }
+.tile.hidden.selected { outline: 2px solid var(--accent); outline-offset: 3px; transform: translateY(-4px); }
+.hidden-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ink2);
+  text-align: center;
+  padding: 3px 4px;
+  line-height: 1.3;
+}
+.hidden-emblem { font-size: 18px; opacity: 0.3; }
+.tile-note {
+  position: absolute;
+  bottom: 3px; left: 2px; right: 2px;
+  font-size: 7.5px;
+  font-weight: 600;
+  color: #1a1208;
+  text-align: center;
+  line-height: 1.2;
+  background: rgba(255,220,100,0.85);
+  border-radius: 3px;
+  padding: 1px 2px;
+}
+
+/* opponent tile — clickable in clue mode */
+.tile.clueable { cursor: pointer; }
+.tile.clueable:hover { transform: translateY(-3px); box-shadow: 0 5px 0 #8a7840, 0 8px 12px rgba(0,0,0,0.5); }
+.tile.clue-highlighted { outline: 2px solid var(--accent); outline-offset: 3px; }
+.tile.clue-dimmed { opacity: 0.4; }
+.tile.empty-slot {
+  background: repeating-linear-gradient(45deg, #2a2418, #2a2418 5px, #241e14 5px, #241e14 10px);
+  box-shadow: none;
+  border: 1px dashed var(--border2);
+}
+
+/* ── ACTION PANEL ── */
+.action-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.action-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink2);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.action-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.action-hint { font-size: 13px; color: var(--ink3); margin-bottom: 10px; }
+
+/* clue mode UI */
+.clue-mode-instructions {
+  background: #1a2a3a;
+  border: 1px solid #2a4a6a;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #88b8d8;
+  margin-bottom: 12px;
+}
+.clue-type-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+.clue-type-label { font-size: 12px; color: var(--ink3); margin-right: 4px; }
+.color-swatch {
+  width: 28px; height: 28px; border-radius: 6px;
+  cursor: pointer; border: 2px solid transparent;
+  transition: all 0.15s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.chosen { border-color: #fff; transform: scale(1.15); }
+.color-swatch.unavail { opacity: 0.2; cursor: not-allowed; transform: none !important; }
+.rank-btn {
+  width: 32px; height: 32px; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--ink); font-weight: 700; font-size: 14px;
+  cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.rank-btn:hover { border-color: var(--accent); color: var(--accent); }
+.rank-btn.chosen { background: var(--accent); color: #1a1208; border-color: var(--accent); }
+.rank-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+/* advice */
+.advice-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.advice-table td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
+.advice-table td:first-child { color: var(--ink3); }
+.advice-table td:last-child { text-align: right; font-weight: 600; }
+.advice-rec {
+  margin-top: 10px;
+  background: #1a2a1a;
+  border: 1px solid #2a5a2a;
+  border-radius: 7px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #88d898;
+}
+
+/* thinking trace */
+.think-scroll { max-height: 120px; overflow-y: auto; }
+.think-line { font-size: 11px; color: var(--ink3); font-style: italic; padding: 1px 0; }
+
+/* game over banner */
+.game-over-banner {
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  text-align: center;
+}
+.game-over-banner.win { background: #0e2e1a; border: 1px solid var(--win); color: #5ae098; }
+.game-over-banner.loss { background: #2e0e0e; border: 1px solid var(--loss); color: #e05858; }
+.game-over-banner.deck_out { background: #0e1a2e; border: 1px solid #3060a0; color: #7090d0; }
+.game-over-banner h2 { font-size: 22px; margin-bottom: 6px; }
+.game-over-banner p { font-size: 14px; opacity: 0.8; }
+
+/* ── PASS OVERLAY ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,8,5,0.92);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.overlay-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 48px 40px;
+  text-align: center;
+  max-width: 360px;
+}
+.overlay-card h3 { font-size: 20px; margin-bottom: 8px; color: var(--accent); }
+.overlay-card p { color: var(--ink3); margin-bottom: 24px; font-size: 14px; }
+
+/* ── TOAST ── */
+.toast-container {
+  position: fixed; bottom: 24px; right: 24px;
+  display: flex; flex-direction: column; gap: 8px;
+  z-index: 200;
+}
+.toast {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--ink);
+  max-width: 280px;
+  animation: slideIn 0.2s ease;
+}
+.toast.error { border-color: var(--red); color: #e08888; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .game-body { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); max-height: 300px; }
+  :root { --tile-w: 52px; --tile-h: 72px; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Hanabi Deluxe II</h1>
-  <p class="sub">Cooperative fireworks, played in the browser. Base rules: 50 tiles, 8 clues, 3 fuses.</p>
 
-  <div class="panel" id="setup-panel">
-    <div class="row">
-      <div>
-        <label for="player-count">Number of players</label>
-        <select id="player-count">
-          <option value="2">2</option>
-          <option value="3" selected>3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
-      </div>
-      <div>
-        <label>Seed (optional)</label>
-        <input id="seed-input" type="number" placeholder="random">
-      </div>
-      <div>
-        <button class="primary" id="start-btn">Start game</button>
-      </div>
+<!-- ── SETUP SCREEN ── -->
+<div id="setup">
+  <div class="setup-card">
+    <div class="setup-title">Hanabi Deluxe II</div>
+    <div class="setup-sub">Cooperative fireworks for 2–5 players · 50 tiles · 8 clues · 3 fuses</div>
+
+    <div class="field">
+      <label>Number of players</label>
+      <select id="player-count">
+        <option value="2">2 players</option>
+        <option value="3" selected>3 players</option>
+        <option value="4">4 players</option>
+        <option value="5">5 players</option>
+      </select>
     </div>
-    <div style="margin-top:14px;">
-      <label>Which seats are human? (rest are bots)</label>
-      <div class="seat-toggles" id="seat-toggles"></div>
+    <div class="field">
+      <label>Seed (optional — leave blank for random)</label>
+      <input id="seed-input" type="number" placeholder="e.g. 42">
     </div>
-  </div>
-
-  <div id="game-area" class="hidden">
-    <div id="banner-area"></div>
-    <div class="panel">
-      <div class="board-top">
-        <div class="fireworks" id="fireworks-row"></div>
-        <div>
-          <div class="tokens" id="clue-tokens"></div>
-          <div class="tokens" id="fuse-tokens" style="margin-top:4px;"></div>
-        </div>
-      </div>
-      <div class="meta-row" id="meta-row"></div>
-      <div class="discard-caption" id="discard-caption"></div>
-      <div class="discard-groups" id="discard-groups"></div>
+    <div class="field">
+      <label>Human seats (others are bots)</label>
+      <div class="seat-row" id="seat-toggles"></div>
     </div>
-
-    <div class="panel" id="hands-panel"></div>
-
-    <div class="panel" id="action-panel"></div>
-
-    <div class="row" style="align-items:flex-start;">
-      <div class="panel" style="flex:1; min-width:260px;">
-        <label>Move history</label>
-        <div class="log-panel" id="log-panel"></div>
-      </div>
-      <div class="panel" style="flex:1; min-width:260px;">
-        <label>Bot thinking (most recent)</label>
-        <div class="log-panel" id="think-panel"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="pass-overlay" class="overlay hidden">
-    <div class="card">
-      <p style="font-size:16px; font-weight:600;" id="pass-text">Pass the device to Player 0</p>
-      <button class="primary" id="pass-continue">I'm ready</button>
-    </div>
+    <button class="btn-primary" id="start-btn">Start game →</button>
   </div>
 </div>
 
+<!-- ── GAME SCREEN ── -->
+<div id="game">
+  <header class="game-header">
+    <div class="game-title">Hanabi Deluxe II</div>
+    <div class="header-stats" id="header-stats"></div>
+    <button class="btn-sm" id="restart-btn">New game</button>
+  </header>
+
+  <div class="game-body">
+    <!-- sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-section-label">Fireworks · <span id="score-display">0</span>/25</div>
+        <div class="fireworks-grid" id="fireworks-grid"></div>
+      </div>
+      <div class="win-meter">
+        <div class="sidebar-section-label">Win probability</div>
+        <div class="win-bar-label">
+          <span id="win-pct-label">—</span>
+          <span id="win-score-label" style="color:var(--ink3);font-weight:400;font-size:12px;"></span>
+        </div>
+        <div class="win-bar-track"><div class="win-bar-fill" id="win-bar" style="width:0%"></div></div>
+        <div class="win-computing" id="win-computing">Computing…</div>
+      </div>
+      <div class="discard-section">
+        <div class="sidebar-section-label">Discard pile</div>
+        <div id="discard-area"><span style="font-size:12px;color:var(--ink3)">Empty</span></div>
+      </div>
+      <div>
+        <div class="sidebar-section-label">Move history</div>
+        <div class="log-scroll" id="log-panel"></div>
+      </div>
+    </aside>
+
+    <!-- main -->
+    <main class="main" id="main-area">
+      <div id="banner-area"></div>
+      <div class="hands-section" id="hands-section"></div>
+      <div id="action-area"></div>
+      <div id="think-area" style="display:none">
+        <div class="sidebar-section-label" style="margin-bottom:6px;">Bot thinking</div>
+        <div class="think-scroll" id="think-panel"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- pass-device overlay -->
+<div class="overlay" id="pass-overlay" style="display:none">
+  <div class="overlay-card">
+    <h3 id="pass-title">Pass the device</h3>
+    <p id="pass-sub">Hand off to the next player</p>
+    <button class="btn-primary" id="pass-btn" style="width:auto;padding:12px 32px;">I'm ready →</button>
+  </div>
+</div>
+
+<!-- toast container -->
+<div class="toast-container" id="toast-container"></div>
+
 <script>
+// ── CONSTANTS ──
 const COLORS = ['Red','Yellow','Green','Blue','White'];
-const COLOR_HEX = { Red: 'var(--red)', Yellow: 'var(--yellow)', Green: 'var(--green)', Blue: 'var(--blue)', White: 'var(--white)' };
-const COLOR_BG = { Red: 'var(--red-bg)', Yellow: 'var(--yellow-bg)', Green: 'var(--green-bg)', Blue: 'var(--blue-bg)', White: 'var(--white-bg)' };
+const COLOR_HEX  = { Red:'#c62828', Yellow:'#d4a017', Green:'#27ae60', Blue:'#1a6fb5', White:'#9a9690' };
+const COLOR_BG   = { Red:'var(--red-light)', Yellow:'var(--yellow-light)', Green:'var(--green-light)', Blue:'var(--blue-light)', White:'var(--white-light)' };
 const RANK_COUNTS = {1:3, 2:2, 3:2, 4:2, 5:1};
-const MAX_CLUES = 8;
-const MAX_FUSES = 3;
-const FIREWORK_TOTAL = 25;
+const MAX_CLUES = 8, MAX_FUSES = 3, FIREWORK_TOTAL = 25;
 const ALL_PAIRS = [];
-for (const c of COLORS) for (const r in RANK_COUNTS) ALL_PAIRS.push(c + ',' + r);
+for (const c of COLORS) for (const r of Object.keys(RANK_COUNTS)) ALL_PAIRS.push(c + ',' + r);
 
-function handSize(n) { return (n === 2 || n === 3) ? 5 : 4; }
+function handSize(n) { return (n <= 3) ? 5 : 4; }
 
+// ── RNG ──
 function mulberry32(seed) {
   return function() {
     seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
@@ -210,461 +602,319 @@ function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
 function makeRng(seed) {
-  const s = (seed === null || seed === undefined || seed === '') ? Math.floor(Math.random() * 1e9) : Number(seed);
+  const s = (seed == null || seed === '') ? Math.floor(Math.random() * 1e9) : Number(seed);
   return mulberry32(s);
 }
 
+// ── DECK ──
 function newDeck(rng) {
   const deck = [];
-  for (const c of COLORS) {
-    for (const r in RANK_COUNTS) {
-      for (let i = 0; i < RANK_COUNTS[r]; i++) deck.push({color: c, rank: parseInt(r)});
-    }
-  }
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
-  }
+  for (const c of COLORS) for (const r in RANK_COUNTS) for (let i = 0; i < RANK_COUNTS[r]; i++) deck.push({color:c, rank:parseInt(r)});
+  for (let i = deck.length-1; i > 0; i--) { const j = Math.floor(rng()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
   return deck;
 }
 
-function newKnowledge() {
-  return { possible: new Set(ALL_PAIRS), notes: [] };
-}
-
+// ── KNOWLEDGE ──
+function newKnowledge() { return { possible: new Set(ALL_PAIRS), notes: [] }; }
 function isIdentified(k) { return k.possible.size === 1; }
 function isUntouched(k) { return k.possible.size === ALL_PAIRS.length; }
-
-function filterKnowledge(k, predicate, noteText) {
-  const before = k.possible;
-  const after = new Set();
-  for (const p of before) if (predicate(p)) after.add(p);
-  k.possible = after;
-  k.notes.push(noteText);
+function pairOf(str) { const i = str.lastIndexOf(','); return { color: str.slice(0,i), rank: parseInt(str.slice(i+1)) }; }
+function filterKnowledge(k, pred, note) {
+  const after = new Set([...k.possible].filter(pred));
+  k.possible = after; k.notes.push(note);
+}
+function describeKnowledge(k) {
+  if (isIdentified(k)) { const {color,rank}=pairOf([...k.possible][0]); return `${color[0]}${rank}`; }
+  const colors = new Set(), ranks = new Set();
+  for (const p of k.possible) { const {color,rank}=pairOf(p); colors.add(color); ranks.add(rank); }
+  const cs = colors.size < COLORS.length ? [...colors].map(c=>c[0]).sort().join('') : '?';
+  const rs = ranks.size < 5 ? [...ranks].sort((a,b)=>a-b).join('') : '?';
+  return `${cs}·${rs}`;
 }
 
-function pairOf(str) {
-  const idx = str.lastIndexOf(',');
-  return { color: str.slice(0, idx), rank: parseInt(str.slice(idx + 1)) };
-}
-
+// ── GAME CLASS ──
 class HanabiGame {
-  constructor(numPlayers, seed) {
-    this.n = numPlayers;
-    this.h = handSize(numPlayers);
+  constructor(n, seed) {
+    this.n = n; this.h = handSize(n);
     this.rng = makeRng(seed);
     this.deck = newDeck(this.rng);
-    this.hands = Array.from({length: this.n}, () => []);
-    this.knowledge = Array.from({length: this.n}, () => []);
-    for (let round = 0; round < this.h; round++) {
-      for (let p = 0; p < this.n; p++) this.drawToHand(p);
-    }
+    this.hands = Array.from({length:n}, ()=>[]);
+    this.knowledge = Array.from({length:n}, ()=>[]);
+    for (let r = 0; r < this.h; r++) for (let p = 0; p < n; p++) this.drawToHand(p);
     this.discardPile = [];
     this.fireworks = {}; for (const c of COLORS) this.fireworks[c] = 0;
-    this.clueTokens = MAX_CLUES;
-    this.strikes = 0;
-    this.currentPlayer = 0;
-    this.turnCount = 0;
-    this.finalRoundLeft = null;
-    this.gameOver = false;
-    this.result = null;
-    this.log = [];
-    this.discardsMade = 0;
-    this.cluesGiven = 0;
+    this.clueTokens = MAX_CLUES; this.strikes = 0;
+    this.currentPlayer = 0; this.turnCount = 0;
+    this.finalRoundLeft = null; this.gameOver = false; this.result = null;
+    this.log = []; this.discardsMade = 0; this.cluesGiven = 0;
   }
-
-  drawToHand(player) {
-    if (this.deck.length > 0) {
-      this.hands[player].push(this.deck.pop());
-      this.knowledge[player].push(newKnowledge());
-    }
+  drawToHand(p) {
+    if (this.deck.length > 0) { this.hands[p].push(this.deck.pop()); this.knowledge[p].push(newKnowledge()); }
   }
-
-  score() {
-    let s = 0; for (const c of COLORS) s += this.fireworks[c]; return s;
-  }
-
+  score() { return COLORS.reduce((s,c) => s + this.fireworks[c], 0); }
   accountedCounts() {
     const acc = {};
-    for (const card of this.discardPile) {
-      const key = card.color + ',' + card.rank;
-      acc[key] = (acc[key] || 0) + 1;
-    }
-    for (const c of COLORS) {
-      for (let r = 1; r <= this.fireworks[c]; r++) {
-        const key = c + ',' + r;
-        acc[key] = (acc[key] || 0) + 1;
-      }
-    }
-    for (const hand of this.knowledge) {
-      for (const k of hand) {
-        if (isIdentified(k)) {
-          const key = [...k.possible][0];
-          acc[key] = (acc[key] || 0) + 1;
-        }
-      }
-    }
+    for (const card of this.discardPile) { const k = card.color+','+card.rank; acc[k]=(acc[k]||0)+1; }
+    for (const c of COLORS) for (let r=1; r<=this.fireworks[c]; r++) { const k=c+','+r; acc[k]=(acc[k]||0)+1; }
+    for (const hand of this.knowledge) for (const k of hand) if (isIdentified(k)) { const key=[...k.possible][0]; acc[key]=(acc[key]||0)+1; }
     return acc;
   }
-
   runElimination() {
     let changed = true;
     while (changed) {
       changed = false;
       const acc = this.accountedCounts();
-      for (const hand of this.knowledge) {
-        for (const k of hand) {
-          if (isIdentified(k)) continue;
-          const before = k.possible;
-          const after = new Set();
-          const removed = [];
-          for (const p of before) {
-            const { color, rank } = pairOf(p);
-            if ((acc[p] || 0) < RANK_COUNTS[rank]) after.add(p);
-            else removed.push(p);
-          }
-          if (after.size !== before.size) {
-            for (const p of removed) {
-              const { color, rank } = pairOf(p);
-              k.notes.push(`eliminated ${color}${rank} (all ${RANK_COUNTS[rank]} copies already accounted for elsewhere)`);
-            }
-            k.possible = after;
-            changed = true;
-            if (after.size === 1) {
-              const { color, rank } = pairOf([...after][0]);
-              k.notes.push(`=> by elimination, this MUST be ${color}${rank} (pigeonhole: nowhere else it could be)`);
-            }
-          }
+      for (const hand of this.knowledge) for (const k of hand) {
+        if (isIdentified(k)) continue;
+        const before = k.possible, after = new Set(), removed = [];
+        for (const p of before) { const {rank}=pairOf(p); if ((acc[p]||0) < RANK_COUNTS[rank]) after.add(p); else removed.push(p); }
+        if (after.size !== before.size) {
+          for (const p of removed) k.notes.push(`elim ${p}`);
+          k.possible = after; changed = true;
+          if (after.size===1) k.notes.push(`=> must be ${[...after][0]}`);
         }
       }
     }
   }
-
-  legalActions(player) {
-    const actions = [];
-    if (this.clueTokens > 0) {
-      for (let target = 0; target < this.n; target++) {
-        if (target === player) continue;
-        const colorsPresent = new Set(this.hands[target].map(c => c.color));
-        const ranksPresent = new Set(this.hands[target].map(c => c.rank));
-        for (const c of colorsPresent) actions.push({kind:'clue', target, clueType:'color', value:c});
-        for (const r of ranksPresent) actions.push({kind:'clue', target, clueType:'rank', value:r});
-      }
+  legalActions(p) {
+    const a = [];
+    if (this.clueTokens > 0) for (let t=0; t<this.n; t++) {
+      if (t===p) continue;
+      for (const c of new Set(this.hands[t].map(x=>x.color))) a.push({kind:'clue',target:t,clueType:'color',value:c});
+      for (const r of new Set(this.hands[t].map(x=>x.rank))) a.push({kind:'clue',target:t,clueType:'rank',value:r});
     }
-    if (this.clueTokens < MAX_CLUES) {
-      for (let i = 0; i < this.hands[player].length; i++) actions.push({kind:'discard', idx:i});
-    }
-    for (let i = 0; i < this.hands[player].length; i++) actions.push({kind:'play', idx:i});
-    return actions;
+    if (this.clueTokens < MAX_CLUES) for (let i=0; i<this.hands[p].length; i++) a.push({kind:'discard',idx:i});
+    for (let i=0; i<this.hands[p].length; i++) a.push({kind:'play',idx:i});
+    return a;
   }
-
-  applyAction(player, action) {
-    if (this.gameOver) throw new Error('game already over');
+  applyAction(p, action) {
+    if (this.gameOver) throw new Error('game over');
     if (action.kind === 'clue') {
-      if (this.clueTokens <= 0) throw new Error('no clue tokens available');
-      if (action.target === player) throw new Error("can't clue yourself");
-      let matchedAny = false;
-      for (let i = 0; i < this.hands[action.target].length; i++) {
-        const card = this.hands[action.target][i];
-        const k = this.knowledge[action.target][i];
+      if (this.clueTokens <= 0) throw new Error('no clue tokens');
+      if (action.target === p) throw new Error("can't clue yourself");
+      let matched = false;
+      for (let i=0; i<this.hands[action.target].length; i++) {
+        const card = this.hands[action.target][i], k = this.knowledge[action.target][i];
         if (action.clueType === 'color') {
-          const matches = card.color === action.value;
-          filterKnowledge(k, p => (pairOf(p).color === action.value) === matches, `told color ${matches?'IS':'is NOT'} ${action.value}`);
-          matchedAny = matchedAny || matches;
+          const m = card.color === action.value;
+          filterKnowledge(k, s => (pairOf(s).color===action.value)===m, `color ${m?'IS':'NOT'} ${action.value}`);
+          if (m) matched = true;
         } else {
-          const matches = card.rank === action.value;
-          filterKnowledge(k, p => (pairOf(p).rank === action.value) === matches, `told rank ${matches?'IS':'is NOT'} ${action.value}`);
-          matchedAny = matchedAny || matches;
+          const m = card.rank === action.value;
+          filterKnowledge(k, s => (pairOf(s).rank===action.value)===m, `rank ${m?'IS':'NOT'} ${action.value}`);
+          if (m) matched = true;
         }
       }
-      if (!matchedAny) throw new Error('clue must match at least one tile');
-      this.clueTokens -= 1;
-      this.cluesGiven += 1;
-      this.log.push(`P${player} clues P${action.target}: ${action.clueType}=${action.value}`);
+      if (!matched) throw new Error('clue must match at least one tile');
+      this.clueTokens--; this.cluesGiven++;
+      this.log.push({type:'clue', text:`P${p} → P${action.target}: ${action.clueType}=${action.value}`});
       this.runElimination();
     } else if (action.kind === 'discard') {
-      if (this.clueTokens >= MAX_CLUES) throw new Error("can't discard while all 8 clue tokens are available");
-      const card = this.hands[player].splice(action.idx, 1)[0];
-      this.knowledge[player].splice(action.idx, 1);
+      if (this.clueTokens >= MAX_CLUES) throw new Error("can't discard with 8 clues");
+      const card = this.hands[p].splice(action.idx,1)[0];
+      this.knowledge[p].splice(action.idx,1);
       this.discardPile.push(card);
-      this.clueTokens = Math.min(MAX_CLUES, this.clueTokens + 1);
-      this.discardsMade += 1;
-      this.log.push(`P${player} discards ${card.color}${card.rank}`);
-      this.runElimination();
-      this.drawReplacement(player);
+      this.clueTokens = Math.min(MAX_CLUES, this.clueTokens+1);
+      this.discardsMade++;
+      this.log.push({type:'discard', text:`P${p} discards ${card.color[0]}${card.rank}`});
+      this.runElimination(); this.drawReplacement(p);
     } else if (action.kind === 'play') {
-      const card = this.hands[player].splice(action.idx, 1)[0];
-      this.knowledge[player].splice(action.idx, 1);
-      if (this.fireworks[card.color] === card.rank - 1) {
+      const card = this.hands[p].splice(action.idx,1)[0];
+      this.knowledge[p].splice(action.idx,1);
+      if (this.fireworks[card.color] === card.rank-1) {
         this.fireworks[card.color] = card.rank;
-        this.log.push(`P${player} plays ${card.color}${card.rank} (success)`);
-        if (card.rank === 5) this.clueTokens = Math.min(MAX_CLUES, this.clueTokens + 1);
-        if (this.score() === FIREWORK_TOTAL) { this.gameOver = true; this.result = 'win'; }
+        this.log.push({type:'play_ok', text:`P${p} plays ${card.color[0]}${card.rank} ✓`});
+        if (card.rank===5) this.clueTokens = Math.min(MAX_CLUES, this.clueTokens+1);
+        if (this.score()===FIREWORK_TOTAL) { this.gameOver=true; this.result='win'; }
       } else {
         this.discardPile.push(card);
-        this.strikes += 1;
-        this.log.push(`P${player} MISPLAYS ${card.color}${card.rank} (strike ${this.strikes}/${MAX_FUSES})`);
-        if (this.strikes >= MAX_FUSES) { this.gameOver = true; this.result = 'loss'; }
+        this.strikes++;
+        this.log.push({type:'play_bad', text:`P${p} misplays ${card.color[0]}${card.rank} ✗ (${this.strikes}/${MAX_FUSES})`});
+        if (this.strikes>=MAX_FUSES) { this.gameOver=true; this.result='loss'; }
       }
       this.runElimination();
-      if (!this.gameOver) this.drawReplacement(player);
-    } else {
-      throw new Error('unknown action');
+      if (!this.gameOver) this.drawReplacement(p);
     }
   }
-
-  drawReplacement(player) {
+  drawReplacement(p) {
     if (this.deck.length > 0) {
-      this.drawToHand(player);
-      if (this.deck.length === 0 && this.finalRoundLeft === null) {
-        this.finalRoundLeft = this.n + 1;
-      }
+      this.drawToHand(p);
+      if (this.deck.length===0 && this.finalRoundLeft===null) this.finalRoundLeft = this.n+1;
     }
   }
-
   advanceTurn() {
-    this.turnCount += 1;
+    this.turnCount++;
     if (this.finalRoundLeft !== null) {
-      this.finalRoundLeft -= 1;
-      if (this.finalRoundLeft <= 0 && !this.gameOver) {
-        this.gameOver = true;
-        this.result = this.result || 'deck_out';
-      }
+      this.finalRoundLeft--;
+      if (this.finalRoundLeft <= 0 && !this.gameOver) { this.gameOver=true; this.result=this.result||'deck_out'; }
     }
-    this.currentPlayer = (this.currentPlayer + 1) % this.n;
+    this.currentPlayer = (this.currentPlayer+1) % this.n;
+  }
+  clone() {
+    const g = Object.create(HanabiGame.prototype);
+    g.n = this.n; g.h = this.h;
+    g.deck = this.deck.map(c=>({...c}));
+    g.hands = this.hands.map(h=>h.map(c=>({...c})));
+    g.knowledge = this.knowledge.map(h=>h.map(k=>({possible:new Set(k.possible),notes:[...k.notes]})));
+    g.discardPile = this.discardPile.map(c=>({...c}));
+    g.fireworks = {...this.fireworks};
+    g.clueTokens=this.clueTokens; g.strikes=this.strikes;
+    g.currentPlayer=this.currentPlayer; g.turnCount=this.turnCount;
+    g.finalRoundLeft=this.finalRoundLeft; g.gameOver=this.gameOver; g.result=this.result;
+    g.log=[]; g.discardsMade=this.discardsMade; g.cluesGiven=this.cluesGiven;
+    g.rng=this.rng;
+    return g;
   }
 }
 
+// ── BOT LOGIC ──
 function remainingCount(game, color, rank) {
-  let total = RANK_COUNTS[rank];
   let used = 0;
-  for (const c of game.discardPile) if (c.color === color && c.rank === rank) used++;
-  if (game.fireworks[color] >= rank) used++;
-  return total - used;
+  for (const c of game.discardPile) if (c.color===color && c.rank===rank) used++;
+  if (game.fireworks[color]>=rank) used++;
+  return RANK_COUNTS[rank] - used;
 }
-
-function isPlayable(possible, fireworks) {
-  for (const p of possible) { const {color, rank} = pairOf(p); if (fireworks[color] !== rank - 1) return false; }
-  return true;
-}
-function isDead(possible, fireworks) {
-  for (const p of possible) { const {color, rank} = pairOf(p); if (rank > fireworks[color]) return false; }
-  return true;
-}
-
-function describeKnowledge(k) {
-  if (isIdentified(k)) { const {color, rank} = pairOf([...k.possible][0]); return `${color}${rank} (known)`; }
-  const colors = new Set(); const ranks = new Set();
-  for (const p of k.possible) { const {color, rank} = pairOf(p); colors.add(color); ranks.add(rank); }
-  const colorStr = colors.size < COLORS.length ? [...colors].map(c=>c[0]).sort().join(',') : 'any';
-  const rankStr = ranks.size < Object.keys(RANK_COUNTS).length ? [...ranks].sort((a,b)=>a-b).join(',') : 'any';
-  return `color:[${colorStr}] rank:[${rankStr}]`;
-}
+function isPlayable(possible, fw) { for (const p of possible) { const {color,rank}=pairOf(p); if (fw[color]!==rank-1) return false; } return true; }
+function isDead(possible, fw) { for (const p of possible) { const {color,rank}=pairOf(p); if (rank>fw[color]) return false; } return true; }
 
 function chooseAction(game, player, trace) {
-  trace = trace || [];
-  const hand = game.hands[player];
-  const know = game.knowledge[player];
-
-  trace.push('My hand: ' + know.map((k,i) => `[${i}] ${describeKnowledge(k)}`).join(' | '));
-  for (let i = 0; i < know.length; i++) {
-    const notes = know[i].notes.filter(n => n.startsWith('=>'));
-    if (notes.length) trace.push(`  slot ${i}: ${notes[notes.length-1]}`);
-  }
-
-  for (let i = 0; i < know.length; i++) {
+  trace = trace||[];
+  const hand=game.hands[player], know=game.knowledge[player];
+  // 1. play provably safe
+  for (let i=0; i<know.length; i++) {
     if (isPlayable(know[i].possible, game.fireworks)) {
-      trace.push(`Slot ${i} (${describeKnowledge(know[i])}) is provably playable -> PLAY slot ${i}.`);
-      return { action: {kind:'play', idx:i}, trace };
+      trace.push(`Slot ${i} is provably playable → PLAY`);
+      return {action:{kind:'play',idx:i},trace};
     }
   }
-
+  // 2. clue to enable play
   if (game.clueTokens > 0) {
-    for (let offset = 1; offset < game.n; offset++) {
-      const target = (player + offset) % game.n;
-      const tHand = game.hands[target]; const tKnow = game.knowledge[target];
-      for (let i = 0; i < tHand.length; i++) {
-        const card = tHand[i]; const k = tKnow[i];
-        if (isPlayable(k.possible, game.fireworks)) continue;
-        if (game.fireworks[card.color] !== card.rank - 1) continue;
-        const trialColor = new Set([...k.possible].filter(p => pairOf(p).color === card.color));
-        if (trialColor.size && isPlayable(trialColor, game.fireworks)) {
-          trace.push(`P${target}'s slot ${i} is really ${card.color}${card.rank} and IS playable now. A color clue would fully pin it down -> clue P${target} color=${card.color}.`);
-          return { action: {kind:'clue', target, clueType:'color', value:card.color}, trace };
-        }
-        const trialRank = new Set([...k.possible].filter(p => pairOf(p).rank === card.rank));
-        if (trialRank.size && isPlayable(trialRank, game.fireworks)) {
-          trace.push(`P${target}'s slot ${i} is really ${card.color}${card.rank} and IS playable now. A rank clue would fully pin it down -> clue P${target} rank=${card.rank}.`);
-          return { action: {kind:'clue', target, clueType:'rank', value:card.rank}, trace };
-        }
+    for (let off=1; off<game.n; off++) {
+      const t=(player+off)%game.n;
+      const tH=game.hands[t], tK=game.knowledge[t];
+      for (let i=0; i<tH.length; i++) {
+        const card=tH[i], k=tK[i];
+        if (isPlayable(k.possible,game.fireworks)) continue;
+        if (game.fireworks[card.color]!==card.rank-1) continue;
+        const tc=new Set([...k.possible].filter(p=>pairOf(p).color===card.color));
+        if (tc.size && isPlayable(tc,game.fireworks)) { trace.push(`Clue P${t} color=${card.color}`); return {action:{kind:'clue',target:t,clueType:'color',value:card.color},trace}; }
+        const tr=new Set([...k.possible].filter(p=>pairOf(p).rank===card.rank));
+        if (tr.size && isPlayable(tr,game.fireworks)) { trace.push(`Clue P${t} rank=${card.rank}`); return {action:{kind:'clue',target:t,clueType:'rank',value:card.rank},trace}; }
       }
     }
-    for (let offset = 1; offset < game.n; offset++) {
-      const target = (player + offset) % game.n;
-      const tHand = game.hands[target]; const tKnow = game.knowledge[target];
-      const chopIdx = tKnow.findIndex(k => isUntouched(k));
-      if (chopIdx === -1) continue;
-      const card = tHand[chopIdx];
-      if (card.rank === 5 || remainingCount(game, card.color, card.rank) === 1) {
-        if (!isDead(tKnow[chopIdx].possible, game.fireworks)) {
-          const reason = card.rank === 5 ? "it's a 5" : "it's the LAST remaining copy of that tile";
-          trace.push(`P${target}'s chop (slot ${chopIdx}, really ${card.color}${card.rank}) is untouched and ${reason} - giving a save clue -> clue P${target} rank=${card.rank}.`);
-          return { action: {kind:'clue', target, clueType:'rank', value:card.rank}, trace };
-        }
+    // 3. save clue
+    for (let off=1; off<game.n; off++) {
+      const t=(player+off)%game.n;
+      const tH=game.hands[t], tK=game.knowledge[t];
+      const chop=tK.findIndex(k=>isUntouched(k));
+      if (chop===-1) continue;
+      const card=tH[chop];
+      if ((card.rank===5 || remainingCount(game,card.color,card.rank)===1) && !isDead(tK[chop].possible,game.fireworks)) {
+        trace.push(`Save P${t} slot ${chop} (${card.color[0]}${card.rank})`);
+        return {action:{kind:'clue',target:t,clueType:'rank',value:card.rank},trace};
       }
     }
   }
-
+  // 4. discard dead
   if (game.clueTokens < MAX_CLUES) {
-    for (let i = 0; i < know.length; i++) {
-      if (isDead(know[i].possible, game.fireworks)) {
-        trace.push(`Slot ${i} (${describeKnowledge(know[i])}) is provably dead already -> DISCARD slot ${i}.`);
-        return { action: {kind:'discard', idx:i}, trace };
-      }
+    for (let i=0; i<know.length; i++) {
+      if (isDead(know[i].possible,game.fireworks)) { trace.push(`Discard dead slot ${i}`); return {action:{kind:'discard',idx:i},trace}; }
     }
-    for (let i = 0; i < know.length; i++) {
-      if (isUntouched(know[i])) {
-        trace.push(`Nothing provably playable or dead. Slot ${i} is my oldest untouched tile (chop) -> DISCARD slot ${i}.`);
-        return { action: {kind:'discard', idx:i}, trace };
-      }
+    for (let i=0; i<know.length; i++) {
+      if (isUntouched(know[i])) { trace.push(`Discard chop slot ${i}`); return {action:{kind:'discard',idx:i},trace}; }
     }
-    trace.push('Nothing clearly safe to discard, falling back to slot 0 -> DISCARD slot 0.');
-    return { action: {kind:'discard', idx:0}, trace };
+    trace.push('Discard slot 0 (fallback)');
+    return {action:{kind:'discard',idx:0},trace};
   }
-
-  const legal = game.legalActions(player).filter(a => a.kind === 'clue');
-  if (legal.length) {
-    trace.push('Clue tokens maxed at 8 so I can\'t discard, and nothing useful to clue - spending an arbitrary clue.');
-    return { action: legal[0], trace };
-  }
-  trace.push('No clue tokens and can\'t discard - forced to play blind on slot 0.');
-  return { action: {kind:'play', idx:0}, trace };
+  const legal=game.legalActions(player).filter(a=>a.kind==='clue');
+  if (legal.length) { trace.push('Arbitrary clue (tokens full)'); return {action:legal[0],trace}; }
+  trace.push('Blind play slot 0');
+  return {action:{kind:'play',idx:0},trace};
 }
 
-function slotProbabilities(game, player, slotIdx) {
-  const k = game.knowledge[player][slotIdx];
-  const acc = game.accountedCounts();
-  const weights = {};
-  let total = 0;
-  for (const p of k.possible) {
-    const { rank } = pairOf(p);
-    const w = RANK_COUNTS[rank] - (acc[p] || 0);
-    if (w > 0) { weights[p] = w; total += w; }
-  }
-  const probs = {};
-  for (const p in weights) probs[p] = weights[p] / total;
-  return probs;
-}
-
-function analyzeHand(game, player) {
-  const results = [];
-  for (let i = 0; i < game.hands[player].length; i++) {
-    const probs = slotProbabilities(game, player, i);
-    let pPlay = 0, pCritical = 0;
-    for (const p in probs) {
-      const { color, rank } = pairOf(p);
-      if (game.fireworks[color] === rank - 1) pPlay += probs[p];
-      if (rank > game.fireworks[color] && remainingCount(game, color, rank) <= 1) pCritical += probs[p];
+// ── WIN PROBABILITY (Monte Carlo) ──
+function estimateWinProbability(game, simCount=300) {
+  if (game.gameOver) { return game.result==='win' ? 1 : 0; }
+  let wins = 0;
+  for (let s=0; s<simCount; s++) {
+    const g = game.clone();
+    // shuffle remaining deck as the "unknown"
+    for (let i=g.deck.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [g.deck[i],g.deck[j]]=[g.deck[j],g.deck[i]]; }
+    let safety = 0;
+    while (!g.gameOver && safety++ < 300) {
+      const {action} = chooseAction(g, g.currentPlayer, null);
+      try { g.applyAction(g.currentPlayer, action); } catch(e) { break; }
+      g.advanceTurn();
     }
-    results.push({ slot: i, pPlay, pCritical });
+    if (g.result==='win') wins++;
   }
-  return results;
+  return wins / simCount;
 }
 
-function recommendAction(game, player) {
-  const lines = [];
-  const analysis = analyzeHand(game, player);
-  lines.push('Play safety by slot:');
-  for (const a of analysis) lines.push(`  slot ${a.slot}: P(playable) = ${(a.pPlay*100).toFixed(1)}%${a.pPlay >= 0.999 ? ' (certain)' : ''}`);
-  lines.push('Discard risk by slot:');
-  for (const a of analysis) lines.push(`  slot ${a.slot}: P(critical if discarded) = ${(a.pCritical*100).toFixed(1)}%${a.pCritical >= 0.999 ? ' (avoid!)' : ''}`);
-  const bestPlay = analysis.reduce((a,b) => b.pPlay > a.pPlay ? b : a);
-  const safestDiscard = analysis.reduce((a,b) => b.pCritical < a.pCritical ? b : a);
-  const { action: botAction, trace } = chooseAction(game, player, []);
-  lines.push('');
-  let suggestion;
-  if (bestPlay.pPlay >= 0.999) {
-    lines.push(`RECOMMENDATION: play slot ${bestPlay.slot} - provably safe (100%).`);
-    suggestion = {kind:'play', idx:bestPlay.slot};
-  } else if (botAction.kind === 'clue') {
-    lines.push(`RECOMMENDATION: ${trace[trace.length-1]}`);
-    suggestion = botAction;
-  } else if (game.clueTokens < MAX_CLUES) {
-    lines.push(`RECOMMENDATION: discard slot ${safestDiscard.slot} - lowest risk (${(safestDiscard.pCritical*100).toFixed(1)}%).`);
-    suggestion = {kind:'discard', idx:safestDiscard.slot};
-  } else {
-    lines.push(`RECOMMENDATION: ${trace[trace.length-1]}`);
-    suggestion = botAction;
-  }
-  return { lines, suggestion };
+// run in small batches to avoid blocking
+let winProbTask = null;
+function scheduleWinProbUpdate() {
+  if (winProbTask) clearTimeout(winProbTask);
+  document.getElementById('win-computing').textContent = 'Computing…';
+  winProbTask = setTimeout(() => {
+    if (!game || game.gameOver) return;
+    const p = estimateWinProbability(game, 400);
+    const pct = Math.round(p*100);
+    document.getElementById('win-bar').style.width = pct+'%';
+    document.getElementById('win-pct-label').textContent = pct+'% win';
+    document.getElementById('win-score-label').textContent = `score ${game.score()}/25`;
+    document.getElementById('win-computing').textContent = `based on 400 simulations`;
+  }, 80);
 }
 
-var game = null;
-var humanSeats = new Set([0]);
-var selectedSlot = null;
-var clueMode = false;
-var clueTargetIdx = null;
-var clueType = null;
-var clueValue = null;
-var lastShownPlayer = -1;
-var thinkingLines = [];
+// ── STATE ──
+var game = null, humanSeats = new Set([0]);
+var selectedSlot = null, clueMode = false, clueTarget = null, clueType = null, clueValue = null;
+var thinkingLines = [], lastShownPlayer = -1;
 
+// ── SETUP ──
 function renderSeatToggles() {
   const n = parseInt(document.getElementById('player-count').value);
-  const container = document.getElementById('seat-toggles');
-  container.innerHTML = '';
-  for (let i = 0; i < n; i++) {
+  const el = document.getElementById('seat-toggles');
+  el.innerHTML = '';
+  for (let i=0; i<n; i++) {
     const chip = document.createElement('div');
-    chip.className = 'seat-chip' + (humanSeats.has(i) ? ' on' : '');
-    chip.textContent = 'Player ' + i;
-    chip.onclick = () => {
-      if (humanSeats.has(i)) humanSeats.delete(i); else humanSeats.add(i);
-      renderSeatToggles();
-    };
-    container.appendChild(chip);
+    chip.className = 'seat-chip'+(humanSeats.has(i)?' on':'');
+    chip.textContent = `Player ${i}`;
+    chip.onclick = () => { humanSeats.has(i)?humanSeats.delete(i):humanSeats.add(i); renderSeatToggles(); };
+    el.appendChild(chip);
   }
 }
-
 document.getElementById('player-count').addEventListener('change', () => {
   const n = parseInt(document.getElementById('player-count').value);
-  humanSeats = new Set([...humanSeats].filter(s => s < n));
-  if (humanSeats.size === 0) humanSeats.add(0);
+  humanSeats = new Set([...humanSeats].filter(s=>s<n));
+  if (humanSeats.size===0) humanSeats.add(0);
   renderSeatToggles();
 });
 renderSeatToggles();
 
 document.getElementById('start-btn').addEventListener('click', () => {
   const n = parseInt(document.getElementById('player-count').value);
-  const seedRaw = document.getElementById('seed-input').value;
-  const seed = seedRaw === '' ? null : parseInt(seedRaw);
-  if (humanSeats.size === 0) { alert('Pick at least one human seat.'); return; }
-  game = new HanabiGame(n, seed);
-  thinkingLines = [];
-  lastShownPlayer = -1;
-  selectedSlot = null; clueMode = false; clueTargetIdx = null; clueType = null; clueValue = null;
-  document.getElementById('setup-panel').classList.add('hidden');
-  document.getElementById('game-area').classList.remove('hidden');
-  render();
+  const seed = document.getElementById('seed-input').value;
+  if (humanSeats.size===0) { toast('Pick at least one human seat.', true); return; }
+  startGame(n, seed===''?null:parseInt(seed));
+});
+document.getElementById('restart-btn').addEventListener('click', () => {
+  document.getElementById('game').classList.remove('visible');
+  document.getElementById('setup').style.display='flex';
 });
 
-function pushThinking(line) {
-  thinkingLines.push(line);
-  if (thinkingLines.length > 300) thinkingLines.shift();
+function startGame(n, seed) {
+  game = new HanabiGame(n, seed);
+  thinkingLines=[]; lastShownPlayer=-1;
+  selectedSlot=null; clueMode=false; clueTarget=null; clueType=null; clueValue=null;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('game').classList.add('visible');
+  render();
 }
 
-function advanceUntilHumanOrOver() {
-  while (!game.gameOver && !humanSeats.has(game.currentPlayer)) {
-    const player = game.currentPlayer;
-    const { action, trace } = chooseAction(game, player, []);
-    for (const line of trace) pushThinking(`(P${player}) ${line}`);
-    game.applyAction(player, action);
-    pushThinking(`>> ${game.log[game.log.length - 1]}`);
-    game.advanceTurn();
-  }
-}
-
+// ── RENDERING ──
 function render() {
   advanceUntilHumanOrOver();
   if (game.gameOver) { renderGameOver(); return; }
@@ -673,319 +923,438 @@ function render() {
     showPassOverlay(cp);
   } else {
     lastShownPlayer = cp;
-    renderGameScreen();
+    renderAll();
   }
 }
 
-function showPassOverlay(player) {
-  document.getElementById('pass-text').textContent = `Pass the device to Player ${player}`;
-  const overlay = document.getElementById('pass-overlay');
-  overlay.classList.remove('hidden');
-  document.getElementById('pass-continue').onclick = () => {
-    overlay.classList.add('hidden');
-    lastShownPlayer = player;
-    renderGameScreen();
-  };
-}
-
-const GEM_COLORS = { Red: '#c62828', Yellow: '#f2a900', Green: '#2e7d32', Blue: '#1565c0', White: '#c8c6bd' };
-const GEM_TEXT = { Red: '#fff', Yellow: '#3a2600', Green: '#fff', Blue: '#fff', White: '#3a3a35' };
-
-function makeTileFront(card, small) {
-  const tile = document.createElement('div');
-  tile.className = 'tile' + (small ? ' small' : '');
-  const gem = document.createElement('div');
-  gem.className = 'tile-gem';
-  gem.style.background = GEM_COLORS[card.color];
-  gem.style.color = GEM_TEXT[card.color];
-  gem.textContent = card.rank;
-  tile.appendChild(gem);
-  const pips = document.createElement('div');
-  pips.className = 'tile-pips';
-  for (let i = 0; i < card.rank; i++) {
-    const p = document.createElement('div');
-    p.className = 'pip';
-    p.style.background = GEM_COLORS[card.color];
-    pips.appendChild(p);
+function advanceUntilHumanOrOver() {
+  while (!game.gameOver && !humanSeats.has(game.currentPlayer)) {
+    const player = game.currentPlayer;
+    const {action, trace} = chooseAction(game, player, []);
+    for (const line of trace) thinkingLines.push(`(P${player}) ${line}`);
+    try { game.applyAction(player, action); } catch(e) {}
+    thinkingLines.push(`>> ${game.log[game.log.length-1]?.text}`);
+    if (thinkingLines.length > 200) thinkingLines.splice(0, 50);
+    game.advanceTurn();
   }
-  tile.appendChild(pips);
-  return tile;
 }
 
-function makeEmptySlot(small) {
-  const tile = document.createElement('div');
-  tile.className = 'tile empty-slot' + (small ? ' small' : '');
-  return tile;
-}
-
-function renderGameScreen() {
-  document.getElementById('banner-area').innerHTML = '';
-  renderBoard();
+function renderAll() {
+  renderHeader();
+  renderSidebar();
   renderHands();
-  renderActionPanel();
-  renderLog();
+  renderActionArea();
   renderThinking();
+  scheduleWinProbUpdate();
 }
 
-function renderBoard() {
-  const fwRow = document.getElementById('fireworks-row');
-  fwRow.innerHTML = '';
-  for (const c of COLORS) {
-    const top = game.fireworks[c];
-    const tile = top > 0 ? makeTileFront({color: c, rank: top}, true) : makeEmptySlot(true);
-    fwRow.appendChild(tile);
-  }
-  const clueRow = document.getElementById('clue-tokens');
-  clueRow.innerHTML = '<span class="small-muted" style="margin-right:6px;">Clues:</span>';
-  for (let i = 0; i < MAX_CLUES; i++) {
-    const t = document.createElement('div');
-    t.className = 'token ' + (i < game.clueTokens ? 'clue-on' : 'clue-off');
-    clueRow.appendChild(t);
-  }
-  const fuseRow = document.getElementById('fuse-tokens');
-  fuseRow.innerHTML = '<span class="small-muted" style="margin-right:6px;">Fuses:</span>';
-  for (let i = 0; i < MAX_FUSES; i++) {
-    const t = document.createElement('div');
-    t.className = 'token ' + (i < game.strikes ? 'fuse-on' : 'fuse-off');
-    fuseRow.appendChild(t);
-  }
-  document.getElementById('meta-row').innerHTML = `
-    <span>Turn ${game.turnCount + 1}</span>
-    <span>Score: ${game.score()}/25</span>
-    <span>Deck left: ${game.deck.length}</span>
-    <span>Current player: P${game.currentPlayer}</span>
+function renderHeader() {
+  const el = document.getElementById('header-stats');
+  const clueHTML = Array.from({length:MAX_CLUES}, (_,i) =>
+    `<div class="token ${i<game.clueTokens?'clue-on':'clue-off'}"></div>`).join('');
+  const fuseHTML = Array.from({length:MAX_FUSES}, (_,i) =>
+    `<div class="token ${i<game.strikes?'fuse-on':'fuse-off'}"></div>`).join('');
+  el.innerHTML = `
+    <div class="stat"><span>Turn</span> <strong>${game.turnCount+1}</strong></div>
+    <div class="stat"><span>Deck</span> <strong>${game.deck.length}</strong></div>
+    <div class="stat"><div class="tokens-display">${clueHTML}</div></div>
+    <div class="stat"><div class="tokens-display">${fuseHTML}</div></div>
+    <div class="stat"><span>P<strong>${game.currentPlayer}</strong>'s turn</span></div>
   `;
-  document.getElementById('discard-caption').textContent = game.discardPile.length === 0
-    ? 'Discard pile: (empty)' : `Discard pile (${game.discardPile.length} tiles):`;
-  const groupsEl = document.getElementById('discard-groups');
-  groupsEl.innerHTML = '';
-  if (game.discardPile.length > 0) {
-    const byColor = {}; for (const c of COLORS) byColor[c] = [];
+}
+
+const FW_COLORS = {Red:'#c62828',Yellow:'#d4a017',Green:'#27ae60',Blue:'#1a6fb5',White:'#9a9690'};
+function renderSidebar() {
+  // fireworks
+  document.getElementById('score-display').textContent = game.score();
+  const fwEl = document.getElementById('fireworks-grid');
+  fwEl.innerHTML = COLORS.map(c => {
+    const top = game.fireworks[c];
+    const pips = Array.from({length:5}, (_,i) => {
+      const filled = i < top;
+      return `<div class="fw-pip${filled?' filled':''}" style="${filled?'background:'+FW_COLORS[c]+';':''}" title="${c} ${i+1}"></div>`;
+    }).join('');
+    return `<div class="fw-row">
+      <div class="fw-color-dot" style="background:${FW_COLORS[c]}"></div>
+      <div class="fw-pips">${pips}</div>
+      <div class="fw-score" style="color:${FW_COLORS[c]}">${top}</div>
+    </div>`;
+  }).join('');
+
+  // discard
+  const dEl = document.getElementById('discard-area');
+  if (game.discardPile.length === 0) { dEl.innerHTML = '<span style="font-size:12px;color:var(--ink3)">Empty</span>'; }
+  else {
+    const byColor = {}; for (const c of COLORS) byColor[c]=[];
     for (const card of game.discardPile) byColor[card.color].push(card.rank);
-    for (const c of COLORS) {
-      const ranks = byColor[c].slice().sort((a, b) => a - b);
-      if (ranks.length === 0) continue;
-      const row = document.createElement('div');
-      row.className = 'discard-group';
-      const label = document.createElement('div');
-      label.className = 'discard-group-label';
-      label.textContent = c;
-      row.appendChild(label);
-      const tilesDiv = document.createElement('div');
-      tilesDiv.className = 'discard-group-tiles';
-      for (const r of ranks) tilesDiv.appendChild(makeTileFront({color: c, rank: r}, true));
-      row.appendChild(tilesDiv);
-      groupsEl.appendChild(row);
-    }
+    dEl.innerHTML = COLORS.filter(c=>byColor[c].length>0).map(c => {
+      const ranks = byColor[c].slice().sort((a,b)=>a-b);
+      const tiles = ranks.map(r => makeTileHTML(c,r,true)).join('');
+      return `<div class="discard-color-group">
+        <div class="discard-color-label" style="color:${FW_COLORS[c]}">${c}</div>
+        <div class="discard-tiles">${tiles}</div>
+      </div>`;
+    }).join('');
   }
+
+  // log
+  const lEl = document.getElementById('log-panel');
+  lEl.innerHTML = game.log.map((entry,i) =>
+    `<div class="log-line ${entry.type}"><span class="lnum">${i+1}.</span>${entry.text}</div>`
+  ).join('');
+  lEl.scrollTop = lEl.scrollHeight;
+}
+
+function makeTileHTML(color, rank, small=false) {
+  const sz = small ? 'small' : '';
+  const gemSz = small ? 'width:18px;height:18px;font-size:10px' : 'width:32px;height:32px;font-size:16px';
+  const pips = Array.from({length:rank}, () =>
+    `<div class="pip" style="background:${FW_COLORS[color]}"></div>`).join('');
+  return `<div class="tile ${sz}">
+    <div class="tile-gem" style="${gemSz};background:${FW_COLORS[color]};color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,0.25),0 1px 3px rgba(0,0,0,0.3)">${rank}</div>
+    <div class="tile-pips">${pips}</div>
+  </div>`;
 }
 
 function renderHands() {
-  const panel = document.getElementById('hands-panel');
-  panel.innerHTML = '';
+  const el = document.getElementById('hands-section');
+  el.innerHTML = '';
   const cp = game.currentPlayer;
-  for (let p = 0; p < game.n; p++) {
-    const block = document.createElement('div');
-    block.className = 'hand-block';
-    const title = document.createElement('div');
-    title.className = 'hand-title';
-    title.innerHTML = `Player ${p}` + (p === cp ? ' <span class="turn-tag">current turn</span>' : '');
-    if (clueMode && p !== cp) {
-      title.style.cursor = 'pointer';
-      title.style.textDecoration = clueTargetIdx === p ? 'underline' : 'none';
-      title.onclick = () => { clueTargetIdx = p; clueType = null; clueValue = null; renderActionPanel(); };
+
+  for (let p=0; p<game.n; p++) {
+    const isOwn = (p===cp);
+    const isHuman = humanSeats.has(p);
+    const isClueTarget = clueMode && p!==cp;
+
+    const div = document.createElement('div');
+    div.className = 'player-row' + (p===cp?' active-player':'');
+
+    const header = document.createElement('div');
+    header.className = 'player-header';
+    const turnTag = p===cp ? '<span class="tag turn">Your turn</span>' : '';
+    const roleTag = `<span class="tag ${isHuman?'human':'bot'}">${isHuman?'Human':'Bot'}</span>`;
+    header.innerHTML = `<span class="player-name">Player ${p}</span>${turnTag}${roleTag}`;
+
+    // in clue mode, clicking a player name targets them
+    if (isClueTarget) {
+      header.style.cursor = 'pointer';
+      header.title = `Clue Player ${p}`;
     }
-    block.appendChild(title);
+
+    div.appendChild(header);
+
     const handDiv = document.createElement('div');
     handDiv.className = 'hand';
-    const isOwnHidden = (p === cp);
-    const cards = game.hands[p];
-    const knows = game.knowledge[p];
-    for (let i = 0; i < cards.length; i++) {
-      let tile;
-      if (isOwnHidden) {
-        tile = document.createElement('div');
-        tile.className = 'tile hidden-tile selectable' + (selectedSlot === i ? ' selected' : '');
-        const emblem = document.createElement('div');
-        emblem.className = 'back-emblem';
-        emblem.textContent = '⛩';
-        tile.appendChild(emblem);
-        const label = document.createElement('div');
-        label.textContent = describeKnowledge(knows[i]);
-        tile.appendChild(label);
-        const pigeonholeNotes = knows[i].notes.filter(n => n.startsWith('=>'));
-        if (pigeonholeNotes.length) {
-          const note = document.createElement('div');
-          note.className = 'note';
-          note.textContent = pigeonholeNotes[pigeonholeNotes.length - 1].replace('=> ', '');
-          tile.appendChild(note);
-        }
-        tile.onclick = () => { selectedSlot = i; renderActionPanel(); renderHands(); };
+
+    for (let i=0; i<game.hands[p].length; i++) {
+      const card = game.hands[p][i];
+      const know = game.knowledge[p][i];
+
+      if (isOwn) {
+        // hidden tile
+        const tile = document.createElement('div');
+        tile.className = 'tile hidden' + (selectedSlot===i?' selected':'');
+        const pigeonhole = [...know.notes].filter(n=>n.startsWith('=>'));
+        const noteText = pigeonhole.length ? pigeonhole[pigeonhole.length-1].replace('=>','').trim() : '';
+        tile.innerHTML = `
+          <div class="hidden-emblem">⛩</div>
+          <div class="hidden-label">${describeKnowledge(know)}</div>
+          ${noteText?`<div class="tile-note">${noteText.slice(0,20)}</div>`:''}
+        `;
+        tile.onclick = () => { selectedSlot=(selectedSlot===i?null:i); clueMode=false; renderHands(); renderActionArea(); };
+        handDiv.appendChild(tile);
       } else {
-        tile = makeTileFront(cards[i], false);
+        // visible tile
+        const tile = document.createElement('div');
+        const highlighted = clueMode && clueTarget===p && clueType && (
+          (clueType==='color' && card.color===clueValue) ||
+          (clueType==='rank' && card.rank===clueValue)
+        );
+        const dimmed = clueMode && clueTarget===p && clueType && !highlighted;
+        tile.className = 'tile' + (clueMode?' clueable':'') + (highlighted?' clue-highlighted':'') + (dimmed?' clue-dimmed':'');
+        tile.innerHTML = `
+          <div class="tile-gem" style="width:32px;height:32px;font-size:16px;background:${FW_COLORS[card.color]};color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,0.25),0 1px 3px rgba(0,0,0,0.3)">${card.rank}</div>
+          <div class="tile-pips">${Array.from({length:card.rank},()=>`<div class="pip" style="background:${FW_COLORS[card.color]}"></div>`).join('')}</div>
+        `;
+        if (clueMode && p!==cp) {
+          tile.onclick = () => {
+            // clicking a tile: auto-select that player and toggle color/rank
+            clueTarget = p;
+            renderActionArea();
+            // don't set clue type here — let user pick from the panel
+          };
+        }
+        handDiv.appendChild(tile);
       }
-      handDiv.appendChild(tile);
     }
-    block.appendChild(handDiv);
-    panel.appendChild(block);
+
+    div.appendChild(handDiv);
+
+    // clue target selector (visible below hand when in clue mode)
+    if (isClueTarget) {
+      div.onclick = (e) => {
+        if (e.target.classList.contains('tile') || e.target.closest('.tile')) return;
+        clueTarget = p; clueType=null; clueValue=null; renderActionArea(); renderHands();
+      };
+    }
+
+    el.appendChild(div);
   }
 }
 
-function renderActionPanel() {
-  const panel = document.getElementById('action-panel');
-  panel.innerHTML = '';
+function renderActionArea() {
+  const el = document.getElementById('action-area');
+  el.innerHTML = '';
+  const cp = game.currentPlayer;
+  if (!humanSeats.has(cp)) return;
 
-  const selInfo = document.createElement('div');
-  selInfo.className = 'small-muted';
-  selInfo.textContent = selectedSlot === null ? 'Click a tile in your own hand above to select it.' : `Selected: slot ${selectedSlot}`;
-  panel.appendChild(selInfo);
-
-  const controls = document.createElement('div');
-  controls.className = 'controls';
-
-  const playBtn = document.createElement('button');
-  playBtn.className = 'primary';
-  playBtn.textContent = 'Play selected tile';
-  playBtn.disabled = selectedSlot === null;
-  playBtn.onclick = () => submitAction({kind: 'play', idx: selectedSlot});
-  controls.appendChild(playBtn);
-
-  const discardBtn = document.createElement('button');
-  discardBtn.textContent = 'Discard selected tile';
-  discardBtn.disabled = selectedSlot === null || game.clueTokens >= MAX_CLUES;
-  discardBtn.title = game.clueTokens >= MAX_CLUES ? "Can't discard while all 8 clue tokens are available" : '';
-  discardBtn.onclick = () => submitAction({kind: 'discard', idx: selectedSlot});
-  controls.appendChild(discardBtn);
-
-  const clueBtn = document.createElement('button');
-  clueBtn.textContent = clueMode ? 'Cancel clue' : 'Give a clue';
-  clueBtn.disabled = game.clueTokens <= 0 && !clueMode;
-  clueBtn.onclick = () => {
-    clueMode = !clueMode; clueTargetIdx = null; clueType = null; clueValue = null;
-    renderActionPanel(); renderHands();
-  };
-  controls.appendChild(clueBtn);
-
-  const adviceBtn = document.createElement('button');
-  adviceBtn.textContent = 'Get advice';
-  adviceBtn.onclick = () => renderAdvice();
-  controls.appendChild(adviceBtn);
-
-  panel.appendChild(controls);
+  const panel = document.createElement('div');
+  panel.className = 'action-panel';
 
   if (clueMode) {
-    const clueSection = document.createElement('div');
-    clueSection.innerHTML = '<div class="small-muted" style="margin-top:10px;">Click a player name above to choose a clue target, then pick a color or rank.</div>';
-    if (clueTargetIdx !== null) {
-      const targetHand = game.hands[clueTargetIdx];
-      const colorsPresent = new Set(targetHand.map(c => c.color));
-      const ranksPresent = new Set(targetHand.map(c => c.rank));
-      const swatchRow = document.createElement('div');
-      swatchRow.className = 'color-swatch-row';
-      for (const c of COLORS) {
-        const sw = document.createElement('div');
-        sw.className = 'color-swatch' + (clueType === 'color' && clueValue === c ? ' chosen' : '');
-        sw.style.background = COLOR_HEX[c];
-        sw.title = c;
-        if (!colorsPresent.has(c)) { sw.style.opacity = 0.25; sw.style.cursor = 'not-allowed'; }
-        else sw.onclick = () => { clueType = 'color'; clueValue = c; renderActionPanel(); };
-        swatchRow.appendChild(sw);
-      }
-      clueSection.appendChild(swatchRow);
-      const rankRow = document.createElement('div');
-      rankRow.className = 'color-swatch-row';
-      for (let r = 1; r <= 5; r++) {
-        const rb = document.createElement('button');
-        rb.className = 'rank-btn' + (clueType === 'rank' && clueValue === r ? ' chosen' : '');
-        rb.textContent = r;
-        if (!ranksPresent.has(r)) rb.disabled = true;
-        else rb.onclick = () => { clueType = 'rank'; clueValue = r; renderActionPanel(); };
-        rankRow.appendChild(rb);
-      }
-      clueSection.appendChild(rankRow);
-      const sendBtn = document.createElement('button');
-      sendBtn.className = 'primary';
-      sendBtn.style.marginTop = '10px';
-      sendBtn.textContent = 'Send clue';
-      sendBtn.disabled = clueType === null;
-      sendBtn.onclick = () => submitAction({kind: 'clue', target: clueTargetIdx, clueType, value: clueValue});
-      clueSection.appendChild(sendBtn);
+    renderCluePanel(panel);
+  } else {
+    renderMovePanel(panel);
+  }
+  el.appendChild(panel);
+}
+
+function renderMovePanel(panel) {
+  const cp = game.currentPlayer;
+  panel.innerHTML = `<div class="action-title">Your move</div>
+    <div class="action-hint">${selectedSlot===null ? 'Click a tile in your hand above to select it.' : `Slot ${selectedSlot} selected.`}</div>`;
+
+  const row = document.createElement('div');
+  row.className = 'action-row';
+
+  const playBtn = document.createElement('button');
+  playBtn.className = 'btn-sm';
+  playBtn.textContent = '▶ Play tile';
+  playBtn.disabled = selectedSlot===null;
+  playBtn.onclick = () => doAction({kind:'play',idx:selectedSlot});
+  row.appendChild(playBtn);
+
+  const discardBtn = document.createElement('button');
+  discardBtn.className = 'btn-sm danger';
+  discardBtn.textContent = '✕ Discard tile';
+  discardBtn.disabled = selectedSlot===null || game.clueTokens>=MAX_CLUES;
+  discardBtn.title = game.clueTokens>=MAX_CLUES ? "Can't discard with 8 clues available" : '';
+  discardBtn.onclick = () => doAction({kind:'discard',idx:selectedSlot});
+  row.appendChild(discardBtn);
+
+  const clueBtn = document.createElement('button');
+  clueBtn.className = 'btn-sm';
+  clueBtn.textContent = '💬 Give clue';
+  clueBtn.disabled = game.clueTokens<=0;
+  clueBtn.onclick = () => { clueMode=true; clueTarget=null; clueType=null; clueValue=null; selectedSlot=null; renderHands(); renderActionArea(); };
+  row.appendChild(clueBtn);
+
+  const adviceBtn = document.createElement('button');
+  adviceBtn.className = 'btn-sm';
+  adviceBtn.textContent = '💡 Advice';
+  adviceBtn.onclick = () => showAdvice(panel);
+  row.appendChild(adviceBtn);
+
+  panel.appendChild(row);
+}
+
+function renderCluePanel(panel) {
+  const cp = game.currentPlayer;
+  const targetHand = clueTarget!==null ? game.hands[clueTarget] : null;
+  const colorsPresent = targetHand ? new Set(targetHand.map(c=>c.color)) : new Set();
+  const ranksPresent = targetHand ? new Set(targetHand.map(c=>c.rank)) : new Set();
+
+  panel.innerHTML = `<div class="action-title">Give a clue</div>`;
+
+  const inst = document.createElement('div');
+  inst.className = 'clue-mode-instructions';
+  inst.textContent = clueTarget===null
+    ? 'Click on a player\'s hand (or their row) to select them as the clue target.'
+    : `Cluing Player ${clueTarget}. Pick a color or rank below, then send.`;
+  panel.appendChild(inst);
+
+  if (clueTarget !== null) {
+    // color swatches
+    const typeRow = document.createElement('div');
+    typeRow.className = 'clue-type-row';
+    typeRow.innerHTML = '<span class="clue-type-label">Color:</span>';
+    for (const c of COLORS) {
+      const sw = document.createElement('div');
+      sw.className = 'color-swatch' + (!colorsPresent.has(c)?' unavail':'') + (clueType==='color'&&clueValue===c?' chosen':'');
+      sw.style.background = FW_COLORS[c];
+      sw.title = c;
+      if (colorsPresent.has(c)) sw.onclick = () => { clueType='color'; clueValue=c; renderHands(); renderActionArea(); };
+      typeRow.appendChild(sw);
     }
-    panel.appendChild(clueSection);
+    typeRow.innerHTML += '<span class="clue-type-label" style="margin-left:12px">Rank:</span>';
+    for (let r=1; r<=5; r++) {
+      const rb = document.createElement('button');
+      rb.className = 'rank-btn' + (clueType==='rank'&&clueValue===r?' chosen':'');
+      rb.textContent = r;
+      rb.disabled = !ranksPresent.has(r);
+      if (ranksPresent.has(r)) rb.onclick = () => { clueType='rank'; clueValue=r; renderHands(); renderActionArea(); };
+      typeRow.appendChild(rb);
+    }
+    panel.appendChild(typeRow);
   }
 
-  const adviceArea = document.createElement('div');
-  adviceArea.id = 'advice-area';
-  adviceArea.className = 'advice-block';
-  adviceArea.style.marginTop = '10px';
-  panel.appendChild(adviceArea);
+  const row = document.createElement('div');
+  row.className = 'action-row';
+
+  const sendBtn = document.createElement('button');
+  sendBtn.className = 'btn-sm';
+  sendBtn.textContent = '✓ Send clue';
+  sendBtn.disabled = clueTarget===null || clueType===null;
+  sendBtn.onclick = () => doAction({kind:'clue',target:clueTarget,clueType,value:clueValue});
+  row.appendChild(sendBtn);
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn-sm';
+  cancelBtn.textContent = '✕ Cancel';
+  cancelBtn.onclick = () => { clueMode=false; clueTarget=null; clueType=null; clueValue=null; renderHands(); renderActionArea(); };
+  row.appendChild(cancelBtn);
+
+  panel.appendChild(row);
 }
 
-function renderAdvice() {
-  const { lines } = recommendAction(game, game.currentPlayer);
-  document.getElementById('advice-area').innerHTML =
-    lines.map(l => `<div class="advice-row"><span>${l}</span></div>`).join('');
+function showAdvice(panel) {
+  const cp = game.currentPlayer;
+  const {lines, suggestion} = recommendAction(game, cp);
+  const advDiv = document.createElement('div');
+  advDiv.className = 'advice-block';
+  advDiv.style.marginTop = '14px';
+
+  const rows = lines.filter(l=>l.trim()).map(l => `<tr><td colspan="2">${l}</td></tr>`).join('');
+  advDiv.innerHTML = `<table class="advice-table"><tbody>${rows}</tbody></table>`;
+
+  const applyBtn = document.createElement('button');
+  applyBtn.className = 'btn-sm';
+  applyBtn.style.marginTop = '10px';
+  applyBtn.textContent = '→ Apply suggestion';
+  applyBtn.onclick = () => doAction(suggestion);
+  advDiv.appendChild(applyBtn);
+
+  // remove old advice if any
+  const old = panel.querySelector('.advice-block');
+  if (old) old.remove();
+  panel.appendChild(advDiv);
 }
 
-function submitAction(action) {
+function slotProbabilities(game, player, slotIdx) {
+  const k = game.knowledge[player][slotIdx];
+  const acc = game.accountedCounts();
+  const weights = {}; let total = 0;
+  for (const p of k.possible) {
+    const {rank}=pairOf(p);
+    const w = RANK_COUNTS[rank]-(acc[p]||0);
+    if (w>0) { weights[p]=w; total+=w; }
+  }
+  const probs = {};
+  for (const p in weights) probs[p] = weights[p]/total;
+  return probs;
+}
+
+function recommendAction(game, player) {
+  const lines = [];
+  const hand = game.knowledge[player];
+  const analysis = hand.map((k,i) => {
+    const probs = slotProbabilities(game,player,i);
+    let pPlay=0, pCrit=0;
+    for (const p in probs) {
+      const {color,rank}=pairOf(p);
+      if (game.fireworks[color]===rank-1) pPlay+=probs[p];
+      if (rank>game.fireworks[color] && remainingCount(game,color,rank)<=1) pCrit+=probs[p];
+    }
+    return {slot:i, pPlay, pCrit};
+  });
+  lines.push('Play chance per slot:');
+  for (const a of analysis) lines.push(`  slot ${a.slot}: ${(a.pPlay*100).toFixed(0)}%${a.pPlay>=0.999?' ✓ certain':''}`);
+  const {action:botAction, trace} = chooseAction(game, player, []);
+  lines.push('');
+  lines.push('Bot would: '+trace[trace.length-1]);
+  return {lines, suggestion:botAction};
+}
+
+function doAction(action) {
   try {
     game.applyAction(game.currentPlayer, action);
-  } catch (e) {
-    alert('Illegal move: ' + e.message);
-    return;
+  } catch(e) {
+    toast(e.message, true); return;
   }
   game.advanceTurn();
-  selectedSlot = null;
-  clueMode = false; clueTargetIdx = null; clueType = null; clueValue = null;
+  selectedSlot=null; clueMode=false; clueTarget=null; clueType=null; clueValue=null;
   render();
 }
 
-function renderLog() {
-  const panel = document.getElementById('log-panel');
-  panel.innerHTML = game.log.map((line, i) => `<div class="log-line"><span class="num">${i + 1}.</span>${line}</div>`).join('');
-  panel.scrollTop = panel.scrollHeight;
-}
-
 function renderThinking() {
+  const area = document.getElementById('think-area');
   const panel = document.getElementById('think-panel');
-  panel.innerHTML = thinkingLines.slice(-40).map(l => `<div class="think-line">${l}</div>`).join('');
+  if (thinkingLines.length===0) { area.style.display='none'; return; }
+  area.style.display='block';
+  panel.innerHTML = thinkingLines.slice(-40).map(l=>`<div class="think-line">${l}</div>`).join('');
   panel.scrollTop = panel.scrollHeight;
 }
 
 function renderGameOver() {
-  document.getElementById('action-panel').innerHTML = '';
+  renderSidebar();
+  renderHeader();
+  document.getElementById('action-area').innerHTML='';
+  document.getElementById('hands-section').innerHTML='';
+
   const banner = document.getElementById('banner-area');
-  const cls = game.result === 'win' ? 'win' : (game.result === 'loss' ? 'loss' : 'deck_out');
-  const text = game.result === 'win' ? `Perfect game! Score ${game.score()}/25` :
-    game.result === 'loss' ? `Game over - 3 strikes. Final score ${game.score()}/25` :
-      `Deck exhausted. Final score ${game.score()}/25`;
-  banner.innerHTML = `<div class="banner ${cls}">${text}</div>`;
-  renderBoard();
-  const panel = document.getElementById('hands-panel');
-  panel.innerHTML = '';
-  for (let p = 0; p < game.n; p++) {
-    const block = document.createElement('div');
-    block.className = 'hand-block';
-    block.innerHTML = `<div class="hand-title">Player ${p}</div>`;
-    const handDiv = document.createElement('div');
-    handDiv.className = 'hand';
+  const cls = game.result==='win'?'win':game.result==='loss'?'loss':'deck_out';
+  const msg = game.result==='win'
+    ? `🎆 Perfect game! Score ${game.score()}/25`
+    : game.result==='loss'
+    ? `💥 3 strikes. Final score ${game.score()}/25`
+    : `🃏 Deck exhausted. Final score ${game.score()}/25`;
+
+  const winPct = game.score()>=25 ? 100 : Math.round(game.score()/25*100);
+  document.getElementById('win-bar').style.width = winPct+'%';
+  document.getElementById('win-pct-label').textContent = `${game.score()}/25`;
+  document.getElementById('win-computing').textContent = 'Game over';
+
+  banner.innerHTML = `<div class="game-over-banner ${cls}">
+    <h2>${msg}</h2>
+    <p>${game.turnCount} turns · ${game.discardsMade} discards · ${game.cluesGiven} clues</p>
+    <button class="btn-primary" style="width:auto;margin-top:16px;padding:10px 28px" onclick="document.getElementById('game').classList.remove('visible');document.getElementById('setup').style.display='flex'">Play again</button>
+  </div>`;
+
+  // show all hands face up
+  const handsEl = document.getElementById('hands-section');
+  for (let p=0; p<game.n; p++) {
+    const div = document.createElement('div');
+    div.className = 'player-row';
+    div.innerHTML = `<div class="player-header"><span class="player-name">Player ${p}</span></div>`;
+    const hand = document.createElement('div');
+    hand.className = 'hand';
     for (const card of game.hands[p]) {
-      handDiv.appendChild(makeTileFront(card, false));
+      hand.innerHTML += makeTileHTML(card.color, card.rank, false);
     }
-    block.appendChild(handDiv);
-    panel.appendChild(block);
+    div.appendChild(hand);
+    handsEl.appendChild(div);
   }
-  renderLog();
-  renderThinking();
-  const restartBtn = document.createElement('button');
-  restartBtn.className = 'primary';
-  restartBtn.textContent = 'Play again';
-  restartBtn.style.marginTop = '12px';
-  restartBtn.onclick = () => {
-    document.getElementById('game-area').classList.add('hidden');
-    document.getElementById('setup-panel').classList.remove('hidden');
+}
+
+function showPassOverlay(player) {
+  document.getElementById('pass-title').textContent = `Player ${player}'s turn`;
+  document.getElementById('pass-sub').textContent = `Pass the device to Player ${player}, then tap Ready.`;
+  const ov = document.getElementById('pass-overlay');
+  ov.style.display='flex';
+  document.getElementById('pass-btn').onclick = () => {
+    ov.style.display='none';
+    lastShownPlayer=player;
+    renderAll();
   };
-  document.getElementById('action-panel').appendChild(restartBtn);
+}
+
+function toast(msg, isError=false) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className='toast'+(isError?' error':'');
+  t.textContent=msg;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
 }
 </script>
 </body>
