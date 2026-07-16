@@ -227,8 +227,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <input id="seed" type="number" placeholder="leave blank for random">
     </div>
     <div class="field">
-      <label>Human seats</label>
+      <label>Your seat</label>
       <div class="seat-row" id="seats"></div>
+    </div>
+    <div class="field">
+      <label>Mode</label>
+      <div class="seat-row" id="mode-row">
+        <div class="seat-chip on" id="mode-normal" onclick="setMode('normal')">Normal</div>
+        <div class="seat-chip" id="mode-director" onclick="setMode('director')">Director — control all bots</div>
+      </div>
+      <div style="margin-top:7px;font-size:11px;color:var(--ink3)" id="mode-desc">You play your seat; bots move automatically.</div>
     </div>
     <button class="btn-go" id="startbtn">Start game →</button>
   </div>
@@ -247,6 +255,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <div class="wm-track"><div class="wm-fill" id="wm-fill" style="width:0%"></div></div>
     </div>
     <div class="tb-btns">
+      <button class="btn" id="rewind-btn" title="Undo last move" disabled>↩ Undo</button>
+      <button class="btn" id="director-toggle" title="Toggle director mode" style="display:none">🎬 Director: ON</button>
       <button class="btn" id="newgame-btn">New game</button>
     </div>
   </div>
@@ -463,23 +473,49 @@ function winProb(g,N=350){
 }
 
 // State
-let game=null,humans=new Set([0]),selSlot=null,clueMode=false,clueTarget=null,clueType=null,clueVal=null,thinkLines=[],lastShown=-1;
+let game=null,humanSeat=0,directorMode=false,selSlot=null,clueMode=false,clueTarget=null,clueType=null,clueVal=null,thinkLines=[],history=[];
 
 // Setup
+function setMode(m){
+  directorMode=m==='director';
+  document.getElementById('mode-normal').className='seat-chip'+(directorMode?'':' on');
+  document.getElementById('mode-director').className='seat-chip'+(directorMode?' on':'');
+  document.getElementById('mode-desc').textContent=directorMode
+    ?'You decide every move for every player — great for experimenting.'
+    :'You play your seat; bots move automatically.';
+}
+
 function renderSeats(){
   const n=parseInt(document.getElementById('pc').value);
   const el=document.getElementById('seats');el.innerHTML='';
-  for(let i=0;i<n;i++){const ch=document.createElement('div');ch.className='seat-chip'+(humans.has(i)?' on':'');ch.textContent='P'+i;ch.onclick=()=>{humans.has(i)?humans.delete(i):humans.add(i);renderSeats();};el.appendChild(ch);}
+  for(let i=0;i<n;i++){
+    const ch=document.createElement('div');
+    ch.className='seat-chip'+(humanSeat===i?' on':'');
+    ch.textContent='P'+i;
+    ch.onclick=()=>{humanSeat=i;renderSeats();};
+    el.appendChild(ch);
+  }
 }
-document.getElementById('pc').addEventListener('change',()=>{const n=parseInt(document.getElementById('pc').value);humans=new Set([...humans].filter(s=>s<n));if(humans.size===0)humans.add(0);renderSeats();});
+document.getElementById('pc').addEventListener('change',()=>{
+  const n=parseInt(document.getElementById('pc').value);
+  if(humanSeat>=n)humanSeat=0;
+  renderSeats();
+});
 renderSeats();
 document.getElementById('startbtn').addEventListener('click',()=>{
-  if(humans.size===0){toast('Pick at least one human seat.',true);return;}
   const n=parseInt(document.getElementById('pc').value);
   const sv=document.getElementById('seed').value;
   startGame(n,sv===''?null:parseInt(sv));
 });
 document.getElementById('newgame-btn').addEventListener('click',()=>{document.getElementById('game').classList.remove('on');document.getElementById('setup').style.display='flex';});
+document.getElementById('rewind-btn').addEventListener('click',()=>{
+  if(history.length===0)return;
+  const snap=history.pop();
+  game=snap.game;thinkLines=snap.thinkLines;
+  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;
+  document.getElementById('rewind-btn').disabled=history.length===0;
+  renderAll();
+});
 
 // Sidebar tabs
 document.querySelectorAll('.sb-tab').forEach(tab=>{
@@ -492,23 +528,26 @@ document.querySelectorAll('.sb-tab').forEach(tab=>{
 });
 
 function startGame(n,seed){
-  game=new Game(n,seed);thinkLines=[];lastShown=-1;
+  game=new Game(n,seed);thinkLines=[];history=[];
   selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;
   document.getElementById('setup').style.display='none';
   document.getElementById('game').classList.add('on');
+  const dtbtn=document.getElementById('director-toggle');
+  dtbtn.style.display='inline-block';
+  dtbtn.textContent='🎬 Director: '+(directorMode?'ON':'OFF');
+  dtbtn.onclick=()=>{directorMode=!directorMode;dtbtn.textContent='🎬 Director: '+(directorMode?'ON':'OFF');selSlot=null;clueMode=false;renderAll();};
+  document.getElementById('rewind-btn').disabled=true;
   render();
 }
 
 function render(){
-  runBots();
+  if(!directorMode) runBots();
   if(game.over){renderGameOver();return;}
-  const cp=game.turn;
-  if(humans.size>1&&cp!==lastShown){showPass(cp);}
-  else{lastShown=cp;renderAll();}
+  renderAll();
 }
 
 function runBots(){
-  while(!game.over&&!humans.has(game.turn)){
+  while(!game.over&&game.turn!==humanSeat){
     const p=game.turn;const{action,tr}=botAct(game,p,[]);
     for(const l of tr)thinkLines.push(`(P${p}) ${l}`);
     try{game.apply(p,action);}catch(e){}
@@ -562,13 +601,19 @@ function renderHands(){
   for(let p=0;p<game.n;p++){
     const div=document.createElement('div');
     div.className='player-row'+(p===cp?' active':'');
-    const isOwn=p===cp;
-    const hum=humans.has(p);
-    div.innerHTML=`<div class="player-header"><span class="player-name">Player ${p}</span>${p===cp?'<span class="tag turn">your turn</span>':''}${hum?'<span class="tag human">Human</span>':'<span class="tag bot">Bot</span>'}</div>`;
+    const isHumanSeat=(p===humanSeat);
+    // In director mode: see all cards face-up (you're the director)
+    // In normal mode: hide only your own current hand
+    const showHidden=(!directorMode)&&isHumanSeat&&(p===cp);
+    const isCurrentTurn=(p===cp);
+    const turnTag=isCurrentTurn?`<span class="tag turn">${directorMode&&!isHumanSeat?'controlling':'your turn'}</span>`:'';
+    const roleTag=isHumanSeat?'<span class="tag human">You</span>':'<span class="tag bot">Bot</span>';
+    div.innerHTML=`<div class="player-header"><span class="player-name">Player ${p}</span>${turnTag}${roleTag}</div>`;
     const hand=document.createElement('div');hand.className='hand';
     for(let i=0;i<game.hands[p].length;i++){
       const card=game.hands[p][i],k=game.know[p][i];
-      if(isOwn){
+      if(showHidden){
+        // hidden tile — current human player's own hand in normal mode
         const t=document.createElement('div');
         t.className='tile hidden'+(selSlot===i?' sel':'');
         const pig=[...k.notes].filter(n=>n.startsWith('=>'));
@@ -577,11 +622,18 @@ function renderHands(){
         t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands();renderAction();};
         hand.appendChild(t);
       } else {
+        // visible tile
         const hl=clueMode&&clueTarget===p&&clueType&&((clueType==='color'&&card.color===clueVal)||(clueType==='rank'&&card.rank===clueVal));
         const dm=clueMode&&clueTarget===p&&clueType&&!hl;
         const t=document.createElement('div');
-        t.className='tile'+(clueMode?' clueable':'')+(hl?' hl':'')+(dm?' dim':'');
+        // In director mode, current player's tiles are selectable
+        const isSelectable=(directorMode&&p===cp)||((!directorMode)&&isHumanSeat&&p===cp);
+        t.className='tile'+(clueMode&&p!==cp?' clueable':'')+(hl?' hl':'')+(dm?' dim':'')+(isSelectable&&!clueMode?' clueable':'');
         t.innerHTML=tileInner(card.color,card.rank);
+        if(isSelectable&&!clueMode){
+          t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands();renderAction();};
+          if(selSlot===i)t.classList.add('hl');
+        }
         if(clueMode&&p!==cp){t.onclick=()=>{clueTarget=p;renderAction();renderHands();};}
         hand.appendChild(t);
       }
@@ -601,7 +653,9 @@ function tileInner(color,rank){
 
 function renderAction(){
   const el=document.getElementById('action');el.innerHTML='';
-  const cp=game.turn;if(!humans.has(cp))return;
+  const cp=game.turn;
+  // show action panel if: director mode (always), or it's the human's own seat
+  if(!directorMode&&cp!==humanSeat)return;
   const panel=document.createElement('div');panel.className='action-panel';
   if(clueMode)renderClue(panel); else renderMove(panel);
   el.appendChild(panel);
@@ -715,7 +769,11 @@ function renderTrace(){
 }
 
 function doAction(action){
-  try{game.apply(game.turn,action);}catch(e){toast(e.message,true);return;}
+  // save snapshot before applying
+  history.push({game:game.clone(),thinkLines:[...thinkLines]});
+  if(history.length>50)history.shift();
+  document.getElementById('rewind-btn').disabled=false;
+  try{game.apply(game.turn,action);}catch(e){history.pop();toast(e.message,true);return;}
   game.advance();selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;
   render();
 }
