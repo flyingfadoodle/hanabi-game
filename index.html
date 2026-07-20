@@ -6,11 +6,11 @@
 <title>Hanabi Deluxe II</title>
 <style>
 :root {
-  --red:#c0392b; --yellow:#c8900a; --green:#1e9e50; --blue:#1a6fb5; --white:#8a8880;
-  --bg:#f4f2ee; --surface:#ffffff; --surface2:#f0ede8; --surface3:#e8e4de;
-  --border:#ddd8d0; --border2:#c8c2b8;
-  --ink:#1e1c18; --ink2:#5a5448; --ink3:#9a9088;
-  --accent:#1a6fb5; --radius:8px;
+  --red:#c0392b;--yellow:#c8900a;--green:#1e9e50;--blue:#1a6fb5;--white:#7a7870;
+  --bg:#f2f0ec;--surface:#ffffff;--surface2:#f0ede8;--surface3:#e8e4de;
+  --border:#ddd8d0;--border2:#c8c2b8;
+  --ink:#1e1c18;--ink2:#5a5448;--ink3:#9a9088;
+  --accent:#1a6fb5;--radius:8px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;}
@@ -18,16 +18,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 
 /* ── SETUP ── */
 #setup{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:50;padding:24px;}
-.sc{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:36px;width:100%;max-width:440px;}
-.sc h1{font-size:26px;font-weight:800;color:var(--accent);letter-spacing:-0.5px;margin-bottom:3px;}
+.sc{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:36px;width:100%;max-width:460px;}
+.sc h1{font-size:26px;font-weight:800;color:var(--accent);letter-spacing:-.5px;margin-bottom:3px;}
 .sc .sub{color:var(--ink3);font-size:12px;margin-bottom:28px;}
 .field{margin-bottom:16px;}
 .field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:6px;}
 .field select,.field input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;color:var(--ink);font-size:13px;padding:9px 12px;font-family:inherit;outline:none;}
 .field select:focus,.field input:focus{border-color:var(--accent);}
-.seat-row{display:flex;gap:6px;flex-wrap:wrap;}
-.seat-chip{padding:6px 13px;border-radius:999px;border:1px solid var(--border2);font-size:12px;cursor:pointer;user-select:none;background:var(--surface2);color:var(--ink2);transition:all .15s;}
-.seat-chip.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700;}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{padding:6px 13px;border-radius:999px;border:1px solid var(--border2);font-size:12px;cursor:pointer;user-select:none;background:var(--surface2);color:var(--ink2);transition:all .15s;}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700;}
+.field-hint{margin-top:7px;font-size:11px;color:var(--ink3);}
 .btn-go{width:100%;background:var(--accent);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:800;padding:13px;cursor:pointer;font-family:inherit;margin-top:6px;transition:background .15s;}
 .btn-go:hover{background:#155da0;}
 
@@ -36,156 +37,161 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 #game.on{display:flex;}
 
 /* TOP BAR */
-.topbar{
-  display:grid;
-  grid-template-columns:auto 1fr auto auto auto auto;
-  align-items:center;
-  gap:0;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  padding:0;
-  flex-shrink:0;
-  height:52px;
-}
-.tb-title{font-size:14px;font-weight:800;color:var(--accent);padding:0 16px;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;}
-.tb-fireworks{display:flex;align-items:center;gap:8px;padding:0 16px;border-right:1px solid var(--border);height:100%;}
-.fw-stack{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.topbar{display:flex;align-items:stretch;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;height:52px;overflow:hidden;}
+.tb-seg{display:flex;align-items:center;padding:0 14px;border-right:1px solid var(--border);gap:8px;flex-shrink:0;}
+.tb-seg:last-child{border-right:none;margin-left:auto;}
+.tb-title{font-size:14px;font-weight:800;color:var(--accent);}
+.fw-stacks{display:flex;gap:10px;align-items:center;}
+.fw-col{display:flex;flex-direction:column;align-items:center;gap:2px;}
 .fw-label{font-size:9px;font-weight:700;letter-spacing:.04em;}
-.fw-pips-row{display:flex;gap:2px;}
-.fw-dot{width:9px;height:9px;border-radius:2px;border:1px solid var(--border2);}
-.fw-dot.on{border:none;}
-.tb-tokens{display:flex;flex-direction:column;gap:4px;padding:0 14px;border-right:1px solid var(--border);height:100%;justify-content:center;}
-.tok-row{display:flex;gap:3px;align-items:center;}
-.tok-label{font-size:9px;color:var(--ink3);width:36px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.fw-pips{display:flex;gap:2px;}
+.fw-pip{width:9px;height:9px;border-radius:2px;border:1px solid var(--border2);}
+.fw-pip.on{border:none;}
+.tok-group{display:flex;flex-direction:column;gap:3px;}
+.tok-row{display:flex;align-items:center;gap:3px;}
+.tok-lbl{font-size:9px;color:var(--ink3);width:34px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
 .tok{width:10px;height:10px;border-radius:50%;}
-.tok.c-on{background:#4a90d9;}
-.tok.c-off{background:var(--border2);}
-.tok.f-on{background:#c0392b;}
-.tok.f-off{background:var(--border2);}
-.tb-stats{display:flex;flex-direction:column;gap:2px;padding:0 14px;border-right:1px solid var(--border);height:100%;justify-content:center;}
+.tok.c-on{background:#4a90d9;}.tok.c-off{background:var(--border2);}
+.tok.f-on{background:#c0392b;}.tok.f-off{background:var(--border2);}
+.tb-stats{display:flex;flex-direction:column;gap:1px;}
 .tb-stat{font-size:11px;color:var(--ink3);}
 .tb-stat strong{color:var(--ink);font-weight:700;}
-.tb-winmeter{padding:0 14px;border-right:1px solid var(--border);height:100%;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:130px;}
-.wm-label{font-size:10px;font-weight:700;color:var(--ink3);display:flex;justify-content:space-between;}
-.wm-track{height:7px;background:var(--surface2);border-radius:999px;border:1px solid var(--border);overflow:hidden;}
+.wm-wrap{display:flex;flex-direction:column;gap:3px;min-width:120px;}
+.wm-lbl{font-size:10px;font-weight:700;color:var(--ink3);display:flex;justify-content:space-between;}
+.wm-track{height:6px;background:var(--surface2);border-radius:999px;border:1px solid var(--border);overflow:hidden;}
 .wm-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#c0392b,#d4a017 50%,#27ae60);transition:width .5s ease;}
-.tb-btns{padding:0 12px;display:flex;gap:8px;align-items:center;}
+.btn{background:var(--surface2);border:1px solid var(--border2);color:var(--ink2);border-radius:6px;font-size:12px;padding:5px 11px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none;}
+.btn.danger{color:#c0392b;border-color:#c0392b;}
+.btn.danger:hover{background:#c0392b;color:#fff;}
+.btn.active-mode{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* REPLAY SCRUBBER */
+.replay-bar{background:#fffbf0;border-bottom:1px solid #e8d890;padding:6px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12px;color:var(--ink2);}
+.replay-bar input[type=range]{flex:1;accent-color:var(--accent);}
+.replay-label{font-size:11px;color:var(--ink3);white-space:nowrap;}
 
 /* BODY */
-.body{display:grid;grid-template-columns:1fr 280px;flex:1;overflow:hidden;min-height:0;}
+.body{display:grid;grid-template-columns:1fr 290px;flex:1;overflow:hidden;min-height:0;}
 
-/* MAIN (left) */
+/* MAIN */
 .main{display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 .main-scroll{overflow-y:auto;flex:1;padding:14px;display:flex;flex-direction:column;gap:12px;}
 
-/* SIDEBAR (right) */
+/* SIDEBAR */
 .sidebar{border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--surface);}
 .sb-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
-.sb-tab{flex:1;padding:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;color:var(--ink3);border:none;background:none;font-family:inherit;text-transform:uppercase;letter-spacing:.06em;transition:all .15s;border-bottom:2px solid transparent;}
+.sb-tab{flex:1;padding:8px 4px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;color:var(--ink3);border:none;background:none;font-family:inherit;text-transform:uppercase;letter-spacing:.06em;transition:all .15s;border-bottom:2px solid transparent;}
 .sb-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .sb-pane{display:none;flex:1;overflow-y:auto;padding:12px;}
 .sb-pane.active{display:block;}
 
 /* ── PLAYER ROWS ── */
-.player-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;transition:border-color .2s;}
-.player-row.active{border-color:var(--accent);}
-.player-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.player-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;transition:border-color .2s;position:relative;}
+.player-row.active-turn{border-color:var(--accent);box-shadow:0 0 0 2px rgba(26,111,181,.12);}
+.player-row.empathy-view{border-color:#d4a017;box-shadow:0 0 0 2px rgba(212,160,23,.15);}
+.player-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
 .player-name{font-weight:700;font-size:13px;}
 .tag{font-size:10px;padding:2px 7px;border-radius:999px;font-weight:700;}
 .tag.turn{background:var(--accent);color:#fff;}
 .tag.bot{background:var(--surface2);color:var(--ink3);border:1px solid var(--border2);}
-.tag.human{background:#deeaf8;color:#1a5090;border:1px solid #b0cce8;}
+.tag.you{background:#deeaf8;color:#1a5090;border:1px solid #b0cce8;}
+.tag.controlling{background:#f0e8d8;color:#8a5010;border:1px solid #d4b880;}
+.tag.empathy{background:#fdf0d8;color:#8a6000;border:1px solid #e8c860;font-style:italic;}
+.pace-badge{margin-left:auto;font-size:10px;color:var(--ink3);}
+.pace-badge strong{color:var(--ink2);}
 .hand{display:flex;gap:7px;flex-wrap:wrap;align-items:flex-end;}
 
 /* ── TILES ── */
 .tile{
-  width:56px;height:76px;border-radius:7px;border:1px solid #c8b880;
+  width:58px;height:80px;border-radius:7px;border:1px solid #c8b880;
   background:linear-gradient(155deg,#fffef8 0%,#f5efd0 100%);
   box-shadow:0 2px 0 #b8a860,0 4px 7px rgba(0,0,0,.18);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-  position:relative;flex-shrink:0;cursor:default;transition:transform .1s,box-shadow .1s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  position:relative;flex-shrink:0;cursor:default;transition:transform .12s,box-shadow .12s,opacity .12s;
+  user-select:none;
 }
-.tile.sm{width:30px;height:42px;border-radius:5px;box-shadow:0 1px 0 #b8a860,0 2px 4px rgba(0,0,0,.15);gap:2px;}
-.tile-gem{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,.25),0 1px 3px rgba(0,0,0,.35);}
-.tile.sm .tile-gem{width:16px;height:16px;font-size:9px;}
+.tile-gem{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,.25),0 1px 3px rgba(0,0,0,.3);}
 .tile-pips{display:flex;gap:2px;}
 .pip{width:5px;height:5px;border-radius:50%;opacity:.8;}
-.tile.sm .pip{width:3px;height:3px;}
+.tile-critical{position:absolute;top:2px;right:3px;font-size:9px;line-height:1;}
+.tile-arrow{position:absolute;top:-22px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:10;}
+.arrow-body{width:2px;height:14px;background:var(--accent);}
+.arrow-head{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--accent);}
+.arrow-badge{font-size:8px;font-weight:800;background:var(--accent);color:#fff;border-radius:3px;padding:1px 3px;margin-bottom:1px;white-space:nowrap;}
+
+/* clued tile: raised + orange border */
+.tile.clued{border-color:#e07820;transform:translateY(-3px);box-shadow:0 5px 0 #b8a860,0 7px 10px rgba(0,0,0,.2);}
 
 /* hidden */
 .tile.hidden{background:linear-gradient(155deg,#dde8f4 0%,#c8d8ee 100%);border-color:#a0b8d8;box-shadow:0 2px 0 #8090a8,0 4px 7px rgba(0,0,0,.18);cursor:pointer;}
 .tile.hidden:hover{transform:translateY(-4px);box-shadow:0 6px 0 #8090a8,0 10px 14px rgba(0,0,0,.15);}
+.tile.hidden.clued{border-color:#e07820;transform:translateY(-4px);}
 .tile.hidden.sel{outline:2px solid var(--accent);outline-offset:3px;transform:translateY(-5px);}
-.h-emblem{font-size:16px;opacity:.3;}
-.h-label{font-size:8.5px;font-weight:600;color:#2a4a6a;text-align:center;padding:0 3px;line-height:1.3;}
-.h-note{position:absolute;bottom:2px;left:2px;right:2px;font-size:7px;font-weight:600;color:#1a1208;text-align:center;line-height:1.2;background:rgba(255,210,60,.9);border-radius:2px;padding:1px 2px;}
+.tile.hidden.sel.clued{transform:translateY(-6px);}
+
+/* pip grid on hidden tiles */
+.pip-grid{display:grid;grid-template-columns:repeat(5,10px);grid-template-rows:repeat(5,10px);gap:1px;margin:2px 0;}
+.pip-grid-cell{width:10px;height:10px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;}
+.pip-grid-cell.possible{opacity:1;}
+.pip-grid-cell.impossible{opacity:.12;}
+
+/* empathy mode — show pips on opponent tiles */
+.tile.empathy-tile{cursor:default;}
 
 /* clueable */
 .tile.clueable{cursor:pointer;}
-.tile.clueable:hover{transform:translateY(-3px);box-shadow:0 5px 0 #7a6e30,0 8px 12px rgba(0,0,0,.5);}
+.tile.clueable:hover:not(.clued){transform:translateY(-3px);box-shadow:0 5px 0 #b8a860,0 8px 12px rgba(0,0,0,.18);}
 .tile.hl{outline:2px solid var(--accent);outline-offset:3px;}
-.tile.dim{opacity:.35;}
+.tile.dim{opacity:.3;}
 .tile.empty{background:repeating-linear-gradient(45deg,#e8e4de,#e8e4de 5px,#ddd8d0 5px,#ddd8d0 10px);box-shadow:none;border:1px dashed var(--border2);}
 
-/* discard tile — smaller with color label */
+/* discard */
 .disc-group{margin-bottom:10px;}
 .disc-color-header{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
 .disc-color-bar{width:3px;height:14px;border-radius:2px;flex-shrink:0;}
 .disc-color-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
 .disc-tiles{display:flex;gap:4px;flex-wrap:wrap;}
-.disc-tile{
-  width:28px;height:38px;border-radius:4px;border:1px solid #c8b880;
-  background:linear-gradient(155deg,#fffef8 0%,#f5efd0 100%);
-  box-shadow:0 1px 0 #b8a860,0 2px 4px rgba(0,0,0,.15);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  flex-shrink:0;position:relative;
-}
-.disc-gem{width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:8px;box-shadow:inset 0 1px 2px rgba(255,255,255,.25);}
+.disc-tile{width:30px;height:40px;border-radius:4px;border:1px solid #c8b880;background:linear-gradient(155deg,#fffef8 0%,#f5efd0 100%);box-shadow:0 1px 0 #b8a860,0 2px 4px rgba(0,0,0,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex-shrink:0;cursor:pointer;transition:transform .1s;}
+.disc-tile:hover{transform:translateY(-2px);}
+.disc-gem{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:8px;box-shadow:inset 0 1px 2px rgba(255,255,255,.25);}
 .disc-pips{display:flex;gap:1px;}
 .disc-pip{width:3px;height:3px;border-radius:50%;opacity:.8;}
 .disc-tile.critical{outline:2px solid #c0392b;outline-offset:1px;}
 .disc-tile.last{outline:2px solid #d4a017;outline-offset:1px;}
 .disc-empty{font-size:11px;color:var(--ink3);font-style:italic;padding:4px 0;}
 
-/* ── ACTION PANEL ── */
+/* action panel */
 .action-panel{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:13px 14px;}
 .ap-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:10px;}
 .ap-hint{font-size:12px;color:var(--ink3);margin-bottom:10px;}
 .ap-row{display:flex;gap:7px;flex-wrap:wrap;}
-.btn{background:var(--surface2);border:1px solid var(--border2);color:var(--ink2);border-radius:6px;font-size:12px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
-.btn:hover{border-color:var(--accent);color:var(--accent);}
-.btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none;}
-.btn.danger{color:#c0392b;border-color:#c0392b;}
-.btn.danger:hover{background:#c0392b;color:#fff;}
-
-/* clue UI */
 .clue-box{background:#eff5fc;border:1px solid #b8d0ea;border-radius:7px;padding:10px 12px;font-size:12px;color:#2a5080;margin-bottom:10px;}
 .clue-pick{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;}
 .clue-pick-label{font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-right:2px;}
-.cswatch{width:24px;height:24px;border-radius:5px;cursor:pointer;border:2px solid transparent;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.35);}
+.cswatch{width:24px;height:24px;border-radius:5px;cursor:pointer;border:2px solid transparent;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
 .cswatch:hover{transform:scale(1.18);}
-.cswatch.on{border-color:#fff;transform:scale(1.18);}
+.cswatch.on{border-color:#000;transform:scale(1.18);}
 .cswatch.na{opacity:.18;cursor:not-allowed;transform:none!important;}
 .rbtn{width:28px;height:28px;border-radius:5px;background:var(--surface2);border:1px solid var(--border2);color:var(--ink);font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;}
 .rbtn:hover{border-color:var(--accent);color:var(--accent);}
-.rbtn.on{background:var(--accent);color:#1a1208;border-color:var(--accent);}
+.rbtn.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .rbtn:disabled{opacity:.2;cursor:not-allowed;}
 
 /* advice */
-.advice-rows{margin-top:8px;}
 .adv-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);color:var(--ink3);}
 .adv-row strong{color:var(--ink);}
 .adv-rec{margin-top:8px;background:#edf7f0;border:1px solid #a0d4b0;border-radius:6px;padding:8px 10px;font-size:12px;color:#1a6e38;}
 
 /* log */
-.log-line{font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);color:var(--ink3);}
-.log-line .n{color:var(--ink2);font-weight:700;margin-right:4px;}
-.log-line.ok{color:#1a7a38;}
-.log-line.bad{color:#b02020;}
-.log-line.clu{color:#1a50a0;}
-.log-line.dis{color:var(--ink3);}
+.log-entry{font-size:11px;padding:4px 6px;border-bottom:1px solid var(--border);cursor:pointer;color:var(--ink3);transition:background .1s;border-radius:3px;}
+.log-entry:hover{background:var(--surface2);}
+.log-entry.current-turn{background:#eef5fc;font-weight:600;color:var(--accent);}
+.log-entry .ln{color:var(--ink2);font-weight:700;margin-right:4px;}
+.log-entry.ok{color:#1a7a38;}.log-entry.bad{color:#b02020;}.log-entry.clu{color:#1a50a0;}.log-entry.dis{color:var(--ink3);}
 
-/* bot trace */
+/* trace */
 .trace-line{font-size:10px;color:var(--ink3);font-style:italic;padding:2px 0;}
 
 /* game over */
@@ -196,13 +202,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .go-banner h2{font-size:20px;margin-bottom:5px;}
 .go-banner p{font-size:12px;opacity:.75;}
 
-/* pass overlay */
+/* overlay */
 .overlay{position:fixed;inset:0;background:rgba(240,236,230,.92);display:flex;align-items:center;justify-content:center;z-index:100;}
 .ov-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:44px 36px;text-align:center;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.12);}
 .ov-card h3{font-size:18px;color:var(--accent);margin-bottom:6px;}
 .ov-card p{color:var(--ink3);font-size:13px;margin-bottom:22px;}
 
-/* toast */
+/* toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:7px;z-index:200;}
 .toast{background:#fff;border:1px solid var(--border2);border-radius:7px;padding:9px 14px;font-size:12px;color:var(--ink);max-width:260px;box-shadow:0 4px 12px rgba(0,0,0,.1);animation:sli .2s ease;}
 .toast.err{border-color:#c0392b;color:#8e1a10;}
@@ -228,15 +234,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     </div>
     <div class="field">
       <label>Your seat</label>
-      <div class="seat-row" id="seats"></div>
+      <div class="chip-row" id="seats"></div>
     </div>
     <div class="field">
       <label>Mode</label>
-      <div class="seat-row" id="mode-row">
-        <div class="seat-chip on" id="mode-normal" onclick="setMode('normal')">Normal</div>
-        <div class="seat-chip" id="mode-director" onclick="setMode('director')">Director — control all bots</div>
+      <div class="chip-row">
+        <div class="chip on" id="mode-normal" onclick="setMode('normal')">Normal</div>
+        <div class="chip" id="mode-director" onclick="setMode('director')">Director</div>
       </div>
-      <div style="margin-top:7px;font-size:11px;color:var(--ink3)" id="mode-desc">You play your seat; bots move automatically.</div>
+      <div class="field-hint" id="mode-desc">You play your seat — bots move automatically.</div>
     </div>
     <button class="btn-go" id="startbtn">Start game →</button>
   </div>
@@ -244,26 +250,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 
 <!-- GAME -->
 <div id="game">
-  <!-- TOP BAR -->
   <div class="topbar">
-    <div class="tb-title">Hanabi II</div>
-    <div class="tb-fireworks" id="tb-fw"></div>
-    <div class="tb-tokens" id="tb-tok"></div>
-    <div class="tb-stats" id="tb-stats"></div>
-    <div class="tb-winmeter" id="tb-win">
-      <div class="wm-label"><span>Win odds</span><span id="wm-pct">—</span></div>
-      <div class="wm-track"><div class="wm-fill" id="wm-fill" style="width:0%"></div></div>
-    </div>
-    <div class="tb-btns">
-      <button class="btn" id="rewind-btn" title="Undo last move" disabled>↩ Undo</button>
-      <button class="btn" id="director-toggle" title="Toggle director mode" style="display:none">🎬 Director: ON</button>
+    <div class="tb-seg"><span class="tb-title">Hanabi II</span></div>
+    <div class="tb-seg" id="tb-fw"></div>
+    <div class="tb-seg" id="tb-tok"></div>
+    <div class="tb-seg" id="tb-stats"></div>
+    <div class="tb-seg"><div class="wm-wrap"><div class="wm-lbl"><span>Win odds</span><span id="wm-pct">—</span></div><div class="wm-track"><div class="wm-fill" id="wm-fill" style="width:0%"></div></div></div></div>
+    <div class="tb-seg" style="gap:6px">
+      <button class="btn" id="rewind-btn" disabled title="Undo">↩ Undo</button>
+      <button class="btn" id="replay-btn" title="Browse history">⏮ Replay</button>
+      <button class="btn" id="director-btn" style="display:none">🎬 Director</button>
       <button class="btn" id="newgame-btn">New game</button>
     </div>
   </div>
 
-  <!-- BODY -->
+  <!-- replay scrubber (hidden unless in replay mode) -->
+  <div class="replay-bar" id="replay-bar" style="display:none">
+    <span class="replay-label">Turn</span>
+    <input type="range" id="replay-slider" min="0" value="0">
+    <span class="replay-label" id="replay-turn-label">0 / 0</span>
+    <button class="btn" id="replay-exit-btn">Exit replay</button>
+  </div>
+
   <div class="body">
-    <!-- MAIN -->
     <div class="main">
       <div class="main-scroll" id="main-scroll">
         <div id="banner"></div>
@@ -271,12 +280,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
         <div id="action"></div>
       </div>
     </div>
-
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="sb-tabs">
         <button class="sb-tab active" data-pane="discard">Discards</button>
-        <button class="sb-tab" data-pane="log">History</button>
+        <button class="sb-tab" data-pane="log">Clue log</button>
         <button class="sb-tab" data-pane="trace">Bot</button>
       </div>
       <div class="sb-pane active" id="pane-discard"></div>
@@ -286,44 +293,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   </div>
 </div>
 
-<!-- PASS OVERLAY -->
-<div class="overlay" id="overlay" style="display:none">
-  <div class="ov-card">
-    <h3 id="ov-title">Pass the device</h3>
-    <p id="ov-sub">Hand off to the next player, then tap Ready.</p>
-    <button class="btn-go" style="width:auto;padding:11px 30px" id="ov-btn">I'm ready →</button>
-  </div>
-</div>
-
 <div class="toast-wrap" id="toasts"></div>
 
 <script>
+// ── CONSTANTS ──────────────────────────────────────────────
 const COLORS=['Red','Yellow','Green','Blue','White'];
-const CHX={Red:'#c0392b',Yellow:'#d4a017',Green:'#27ae60',Blue:'#1a6fb5',White:'#8a8880'};
+const CHX={Red:'#c0392b',Yellow:'#c8900a',Green:'#1e9e50',Blue:'#1a6fb5',White:'#7a7870'};
+const CLET={Red:'R',Yellow:'Y',Green:'G',Blue:'B',White:'W'};
 const RC={1:3,2:2,3:2,4:2,5:1};
-const MAX_C=8,MAX_F=3,FW_TOT=25;
-const ALL_PAIRS=[];
-for(const c of COLORS)for(const r of Object.keys(RC))ALL_PAIRS.push(c+','+r);
+const MAX_C=8,MAX_F=3;
 function handSize(n){return n<=3?5:4;}
 
-// RNG
+// ── RNG ────────────────────────────────────────────────────
 function mulberry(s){return()=>{s|=0;s=(s+0x6D2B79F5)|0;let t=Math.imul(s^(s>>>15),1|s);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
 function mkRng(s){return mulberry(s==null||s===''?Math.floor(Math.random()*1e9):Number(s));}
 
-// Knowledge
-function newK(){return{possible:new Set(ALL_PAIRS),notes:[]};}
+// ── KNOWLEDGE ──────────────────────────────────────────────
+const ALL_PAIRS=[];
+for(const c of COLORS)for(const r of[1,2,3,4,5])ALL_PAIRS.push(c+','+r);
+function newK(){return{possible:new Set(ALL_PAIRS),clues:[],positiveColors:new Set(),positiveRanks:new Set()};}
 function isId(k){return k.possible.size===1;}
-function isUnt(k){return k.possible.size===ALL_PAIRS.length;}
+function isUnt(k){return k.clues.length===0;}
 function pairOf(s){const i=s.lastIndexOf(',');return{color:s.slice(0,i),rank:parseInt(s.slice(i+1))};}
-function filterK(k,pred,note){k.possible=new Set([...k.possible].filter(pred));k.notes.push(note);}
-function descK(k){
-  if(isId(k)){const{color,rank}=pairOf([...k.possible][0]);return`${color[0]}${rank}`;}
-  const cs=new Set(),rs=new Set();
-  for(const p of k.possible){const{color,rank}=pairOf(p);cs.add(color);rs.add(rank);}
-  return`${cs.size<5?[...cs].map(c=>c[0]).sort().join(''):'?'}·${rs.size<5?[...rs].sort((a,b)=>a-b).join(''):'?'}`;
-}
+function filterK(k,pred,note){k.possible=new Set([...k.possible].filter(pred));k.clues.push(note);}
 
-// Game
+// ── GAME ───────────────────────────────────────────────────
 class Game{
   constructor(n,seed){
     this.n=n;this.h=handSize(n);
@@ -337,68 +331,71 @@ class Game{
     this.disc=[];this.fw={};for(const c of COLORS)this.fw[c]=0;
     this.clues=MAX_C;this.strikes=0;this.turn=0;this.turnN=0;
     this.finalLeft=null;this.over=false;this.result=null;
-    this.log=[];this.discN=0;this.clueN=0;this.rng=rng;
+    this.log=[];this.discN=0;this.clueN=0;
+    // last clue info for arrows
+    this.lastClue=null;
   }
   _draw(p){if(this.deck.length>0){this.hands[p].push(this.deck.pop());this.know[p].push(newK());}}
   score(){return COLORS.reduce((s,c)=>s+this.fw[c],0);}
+  pace(){return this.score()+this.deck.length+this.n-25;}
   accCounts(){
     const a={};
     for(const c of this.disc){const k=c.color+','+c.rank;a[k]=(a[k]||0)+1;}
     for(const c of COLORS)for(let r=1;r<=this.fw[c];r++){const k=c+','+r;a[k]=(a[k]||0)+1;}
-    for(const hand of this.know)for(const k of hand)if(isId(k)){const key=[...k.possible][0];a[key]=(a[key]||0)+1;}
     return a;
+  }
+  isCritical(color,rank){
+    let used=0;for(const c of this.disc)if(c.color===color&&c.rank===rank)used++;
+    if(this.fw[color]>=rank)return false;
+    return RC[rank]-used===1;
   }
   elim(){
     let ch=true;
     while(ch){ch=false;const a=this.accCounts();
       for(const hand of this.know)for(const k of hand){
         if(isId(k))continue;
-        const before=k.possible,after=new Set(),rm=[];
-        for(const p of before){const{rank}=pairOf(p);if((a[p]||0)<RC[rank])after.add(p);else rm.push(p);}
-        if(after.size!==before.size){for(const p of rm)k.notes.push('elim '+p);k.possible=after;ch=true;if(after.size===1)k.notes.push('=>'+[...after][0]);}
+        const before=k.possible,after=new Set();
+        for(const p of before){const{rank}=pairOf(p);if((a[p]||0)<RC[rank])after.add(p);}
+        if(after.size!==before.size){k.possible=after;ch=true;}
       }
     }
   }
-  legal(p){
-    const a=[];
-    if(this.clues>0)for(let t=0;t<this.n;t++){if(t===p)continue;
-      for(const c of new Set(this.hands[t].map(x=>x.color)))a.push({kind:'clue',target:t,ct:'color',v:c});
-      for(const r of new Set(this.hands[t].map(x=>x.rank)))a.push({kind:'clue',target:t,ct:'rank',v:r});}
-    if(this.clues<MAX_C)for(let i=0;i<this.hands[p].length;i++)a.push({kind:'discard',idx:i});
-    for(let i=0;i<this.hands[p].length;i++)a.push({kind:'play',idx:i});
-    return a;
-  }
   apply(p,action){
     if(this.over)throw new Error('game over');
+    this.lastClue=null;
     if(action.kind==='clue'){
       if(this.clues<=0)throw new Error('no clue tokens');
       if(action.target===p)throw new Error("can't clue yourself");
-      let hit=false;
+      let touched=[];
       for(let i=0;i<this.hands[action.target].length;i++){
         const card=this.hands[action.target][i],k=this.know[action.target][i];
-        if(action.ct==='color'){const m=card.color===action.v;filterK(k,s=>(pairOf(s).color===action.v)===m,`color ${m?'IS':'NOT'} ${action.v}`);if(m)hit=true;}
-        else{const m=card.rank===action.v;filterK(k,s=>(pairOf(s).rank===action.v)===m,`rank ${m?'IS':'NOT'} ${action.v}`);if(m)hit=true;}
+        const m=action.ct==='color'?card.color===action.v:card.rank===action.v;
+        filterK(k,s=>{const{color,rank}=pairOf(s);return action.ct==='color'?(color===action.v)===m:(rank===action.v)===m;},
+          `${m?'+':'-'}${action.ct==='color'?CLET[action.v]:action.v}`);
+        if(m){touched.push(i);if(action.ct==='color')k.positiveColors.add(action.v);else k.positiveRanks.add(action.v);}
       }
-      if(!hit)throw new Error('clue must touch at least one tile');
+      if(touched.length===0)throw new Error('clue must touch at least one tile');
       this.clues--;this.clueN++;
-      this.log.push({type:'clu',text:`P${p} → P${action.target}: ${action.ct}=${action.v}`});
+      this.lastClue={target:action.target,ct:action.ct,v:action.v,touched};
+      const vStr=action.ct==='color'?action.v:action.v;
+      this.log.push({type:'clu',text:`P${p}→P${action.target}: ${action.ct}=${vStr}`,turn:this.turnN});
       this.elim();
     } else if(action.kind==='discard'){
       if(this.clues>=MAX_C)throw new Error("can't discard with 8 clues");
       const card=this.hands[p].splice(action.idx,1)[0];this.know[p].splice(action.idx,1);
       this.disc.push(card);this.clues=Math.min(MAX_C,this.clues+1);this.discN++;
-      this.log.push({type:'dis',text:`P${p} discards ${card.color[0]}${card.rank}`});
+      this.log.push({type:'dis',text:`P${p} discards ${card.color[0]}${card.rank}`,turn:this.turnN});
       this.elim();this._rep(p);
     } else if(action.kind==='play'){
       const card=this.hands[p].splice(action.idx,1)[0];this.know[p].splice(action.idx,1);
       if(this.fw[card.color]===card.rank-1){
         this.fw[card.color]=card.rank;
-        this.log.push({type:'ok',text:`P${p} plays ${card.color[0]}${card.rank} ✓`});
+        this.log.push({type:'ok',text:`P${p} plays ${card.color[0]}${card.rank} ✓`,turn:this.turnN});
         if(card.rank===5)this.clues=Math.min(MAX_C,this.clues+1);
-        if(this.score()===FW_TOT){this.over=true;this.result='win';}
+        if(this.score()===25){this.over=true;this.result='win';}
       } else {
         this.disc.push(card);this.strikes++;
-        this.log.push({type:'bad',text:`P${p} misplays ${card.color[0]}${card.rank} ✗ (${this.strikes}/${MAX_F})`});
+        this.log.push({type:'bad',text:`P${p} misplays ${card.color[0]}${card.rank} ✗ (${this.strikes}/${MAX_F})`,turn:this.turnN});
         if(this.strikes>=MAX_F){this.over=true;this.result='loss';}
       }
       this.elim();if(!this.over)this._rep(p);
@@ -414,23 +411,24 @@ class Game{
     const g=Object.create(Game.prototype);
     g.n=this.n;g.h=this.h;g.deck=this.deck.map(c=>({...c}));
     g.hands=this.hands.map(h=>h.map(c=>({...c})));
-    g.know=this.know.map(h=>h.map(k=>({possible:new Set(k.possible),notes:[...k.notes]})));
+    g.know=this.know.map(h=>h.map(k=>({possible:new Set(k.possible),clues:[...k.clues],positiveColors:new Set(k.positiveColors),positiveRanks:new Set(k.positiveRanks)})));
     g.disc=this.disc.map(c=>({...c}));g.fw={...this.fw};
     g.clues=this.clues;g.strikes=this.strikes;g.turn=this.turn;g.turnN=this.turnN;
     g.finalLeft=this.finalLeft;g.over=this.over;g.result=this.result;
-    g.log=[];g.discN=this.discN;g.clueN=this.clueN;g.rng=this.rng;
+    g.log=this.log.map(e=>({...e}));g.discN=this.discN;g.clueN=this.clueN;
+    g.lastClue=this.lastClue?{...this.lastClue,touched:[...this.lastClue.touched]}:null;
     return g;
   }
 }
 
-// Bot
+// ── BOT ────────────────────────────────────────────────────
 function remCount(g,color,rank){let u=0;for(const c of g.disc)if(c.color===color&&c.rank===rank)u++;if(g.fw[color]>=rank)u++;return RC[rank]-u;}
 function isPlay(pos,fw){for(const p of pos){const{color,rank}=pairOf(p);if(fw[color]!==rank-1)return false;}return true;}
 function isDead(pos,fw){for(const p of pos){const{color,rank}=pairOf(p);if(rank>fw[color])return false;}return true;}
 
 function botAct(g,p,tr){
-  tr=tr||[];const hand=g.hands[p],know=g.know[p];
-  for(let i=0;i<know.length;i++)if(isPlay(know[i].possible,g.fw)){tr.push(`Play slot ${i} (provably safe)`);return{action:{kind:'play',idx:i},tr};}
+  tr=tr||[];const know=g.know[p];
+  for(let i=0;i<know.length;i++)if(isPlay(know[i].possible,g.fw)){tr.push(`Play slot ${i} (certain)`);return{action:{kind:'play',idx:i},tr};}
   if(g.clues>0){
     for(let off=1;off<g.n;off++){const t=(p+off)%g.n,tH=g.hands[t],tK=g.know[t];
       for(let i=0;i<tH.length;i++){const card=tH[i],k=tK[i];
@@ -453,12 +451,14 @@ function botAct(g,p,tr){
     for(let i=0;i<know.length;i++)if(isUnt(know[i])){tr.push(`Discard chop slot ${i}`);return{action:{kind:'discard',idx:i},tr};}
     tr.push('Discard slot 0');return{action:{kind:'discard',idx:0},tr};
   }
-  const l=g.legal(p).filter(a=>a.kind==='clue');
-  if(l.length){tr.push('Arbitrary clue');return{action:l[0],tr};}
-  tr.push('Blind play slot 0');return{action:{kind:'play',idx:0},tr};
+  const l=g.hands[p].map((_,i)=>i);
+  tr.push('Arb clue / play');
+  const legal=[];for(let t=0;t<g.n;t++){if(t===p)continue;for(const c of COLORS)legal.push({kind:'clue',target:t,ct:'color',v:c});}
+  if(legal.length)return{action:legal[0],tr};
+  return{action:{kind:'play',idx:0},tr};
 }
 
-// Win probability
+// ── WIN PROBABILITY ────────────────────────────────────────
 function winProb(g,N=350){
   if(g.over)return g.result==='win'?1:0;
   let w=0;
@@ -472,17 +472,22 @@ function winProb(g,N=350){
   return w/N;
 }
 
-// State
-let game=null,humanSeat=0,directorMode=false,selSlot=null,clueMode=false,clueTarget=null,clueType=null,clueVal=null,thinkLines=[],history=[];
+// ── STATE ──────────────────────────────────────────────────
+let game=null,humanSeat=0,directorMode=false;
+let selSlot=null,clueMode=false,clueTarget=null,clueType=null,clueVal=null;
+let thinkLines=[],snapshots=[];
+let replayMode=false,replayIdx=0,replaySnaps=[];
+let empathyPlayer=null; // which player's perspective we're showing
+let winTask=null;
 
-// Setup
+// ── SETUP ──────────────────────────────────────────────────
 function setMode(m){
   directorMode=m==='director';
-  document.getElementById('mode-normal').className='seat-chip'+(directorMode?'':' on');
-  document.getElementById('mode-director').className='seat-chip'+(directorMode?' on':'');
+  document.getElementById('mode-normal').className='chip'+(directorMode?'':' on');
+  document.getElementById('mode-director').className='chip'+(directorMode?' on':'');
   document.getElementById('mode-desc').textContent=directorMode
-    ?'You decide every move for every player — great for experimenting.'
-    :'You play your seat; bots move automatically.';
+    ?'You decide every move for all players — see all cards.'
+    :'You play your seat — bots move automatically.';
 }
 
 function renderSeats(){
@@ -490,7 +495,7 @@ function renderSeats(){
   const el=document.getElementById('seats');el.innerHTML='';
   for(let i=0;i<n;i++){
     const ch=document.createElement('div');
-    ch.className='seat-chip'+(humanSeat===i?' on':'');
+    ch.className='chip'+(humanSeat===i?' on':'');
     ch.textContent='P'+i;
     ch.onclick=()=>{humanSeat=i;renderSeats();};
     el.appendChild(ch);
@@ -502,22 +507,20 @@ document.getElementById('pc').addEventListener('change',()=>{
   renderSeats();
 });
 renderSeats();
+
 document.getElementById('startbtn').addEventListener('click',()=>{
   const n=parseInt(document.getElementById('pc').value);
   const sv=document.getElementById('seed').value;
   startGame(n,sv===''?null:parseInt(sv));
 });
-document.getElementById('newgame-btn').addEventListener('click',()=>{document.getElementById('game').classList.remove('on');document.getElementById('setup').style.display='flex';});
-document.getElementById('rewind-btn').addEventListener('click',()=>{
-  if(history.length===0)return;
-  const snap=history.pop();
-  game=snap.game;thinkLines=snap.thinkLines;
-  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;
-  document.getElementById('rewind-btn').disabled=history.length===0;
-  renderAll();
+document.getElementById('newgame-btn').addEventListener('click',()=>{
+  document.getElementById('game').classList.remove('on');
+  document.getElementById('setup').style.display='flex';
 });
-
-// Sidebar tabs
+document.getElementById('rewind-btn').addEventListener('click',doUndo);
+document.getElementById('replay-btn').addEventListener('click',enterReplay);
+document.getElementById('replay-exit-btn').addEventListener('click',exitReplay);
+document.getElementById('replay-slider').addEventListener('input',onReplaySlider);
 document.querySelectorAll('.sb-tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.sb-tab').forEach(t=>t.classList.remove('active'));
@@ -528,20 +531,75 @@ document.querySelectorAll('.sb-tab').forEach(tab=>{
 });
 
 function startGame(n,seed){
-  game=new Game(n,seed);thinkLines=[];history=[];
-  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;
+  game=new Game(n,seed);thinkLines=[];snapshots=[];
+  replayMode=false;replaySnaps=[replayState()];
+  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
   document.getElementById('setup').style.display='none';
   document.getElementById('game').classList.add('on');
-  const dtbtn=document.getElementById('director-toggle');
-  dtbtn.style.display='inline-block';
-  dtbtn.textContent='🎬 Director: '+(directorMode?'ON':'OFF');
-  dtbtn.onclick=()=>{directorMode=!directorMode;dtbtn.textContent='🎬 Director: '+(directorMode?'ON':'OFF');selSlot=null;clueMode=false;renderAll();};
+  document.getElementById('replay-bar').style.display='none';
   document.getElementById('rewind-btn').disabled=true;
+  const db=document.getElementById('director-btn');
+  db.style.display='inline-block';
+  db.textContent='🎬 '+(directorMode?'Director ON':'Director OFF');
+  db.onclick=()=>{directorMode=!directorMode;db.textContent='🎬 '+(directorMode?'Director ON':'Director OFF');selSlot=null;clueMode=false;renderAll();};
   render();
 }
 
+// ── SNAPSHOT / REPLAY ─────────────────────────────────────
+function replayState(){return{game:game.clone(),thinkLines:[...thinkLines]};}
+
+function doUndo(){
+  if(snapshots.length===0)return;
+  const snap=snapshots.pop();
+  game=snap.game;thinkLines=snap.thinkLines;
+  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
+  document.getElementById('rewind-btn').disabled=snapshots.length===0;
+  // rebuild replaySnaps
+  replaySnaps=[replayState()];
+  renderAll();
+}
+
+function enterReplay(){
+  replaySnaps=[replayState()];
+  // replay from the very start: rebuild from snapshots array
+  // We keep a full snap list: snapshots[0] is oldest
+  // Build complete replay chain from start
+  // The replaySnaps is: [start_of_game, ...per_action_snaps]
+  // We'll use the existing snapshots array (each snap is BEFORE that action)
+  // snapshots[0] = game state before action 1, etc.
+  // For replay, we want index 0 = initial state, index N = current state
+  const chain=[...snapshots, replayState()];
+  replaySnaps=chain;
+  replayIdx=chain.length-1;
+  replayMode=true;
+  const slider=document.getElementById('replay-slider');
+  slider.max=chain.length-1;
+  slider.value=replayIdx;
+  document.getElementById('replay-bar').style.display='flex';
+  document.getElementById('replay-turn-label').textContent=`${replayIdx} / ${chain.length-1}`;
+  renderAll();
+}
+
+function exitReplay(){
+  replayMode=false;
+  document.getElementById('replay-bar').style.display='none';
+  renderAll();
+}
+
+function onReplaySlider(){
+  replayIdx=parseInt(document.getElementById('replay-slider').value);
+  document.getElementById('replay-turn-label').textContent=`${replayIdx} / ${replaySnaps.length-1}`;
+  renderAll();
+}
+
+function currentDisplayGame(){
+  if(replayMode&&replaySnaps.length>0)return replaySnaps[replayIdx].game;
+  return game;
+}
+
+// ── RENDER ORCHESTRATION ──────────────────────────────────
 function render(){
-  if(!directorMode) runBots();
+  if(!directorMode)runBots();
   if(game.over){renderGameOver();return;}
   renderAll();
 }
@@ -550,181 +608,313 @@ function runBots(){
   while(!game.over&&game.turn!==humanSeat){
     const p=game.turn;const{action,tr}=botAct(game,p,[]);
     for(const l of tr)thinkLines.push(`(P${p}) ${l}`);
+    snapshots.push(replayState());
+    if(snapshots.length>80)snapshots.shift();
     try{game.apply(p,action);}catch(e){}
     thinkLines.push(`>> ${game.log[game.log.length-1]?.text}`);
-    if(thinkLines.length>300)thinkLines.splice(0,60);
+    if(thinkLines.length>400)thinkLines.splice(0,80);
     game.advance();
+    document.getElementById('rewind-btn').disabled=false;
   }
 }
 
-let winTask=null;
 function scheduleWin(){
   if(winTask)clearTimeout(winTask);
   document.getElementById('wm-pct').textContent='…';
   winTask=setTimeout(()=>{
-    if(!game||game.over)return;
-    const p=winProb(game,350);
+    const g=currentDisplayGame();
+    if(!g||g.over)return;
+    const p=winProb(g,350);
     const pct=Math.round(p*100);
     document.getElementById('wm-fill').style.width=pct+'%';
     document.getElementById('wm-pct').textContent=pct+'%';
-  },60);
+  },80);
 }
 
 function renderAll(){
-  renderTopBar();
-  renderHands();
-  renderAction();
-  renderSidebar();
+  const g=currentDisplayGame();
+  renderTopBar(g);
+  renderHands(g);
+  if(!replayMode)renderAction(g);
+  else document.getElementById('action').innerHTML='';
+  renderSidebar(g);
   scheduleWin();
 }
 
-const FW_COLORS=CHX;
-function renderTopBar(){
-  // fireworks
+// ── TOP BAR ───────────────────────────────────────────────
+function renderTopBar(g){
   const fwEl=document.getElementById('tb-fw');
-  fwEl.innerHTML=COLORS.map(c=>{
-    const top=game.fw[c];
-    const pips=Array.from({length:5},(_,i)=>`<div class="fw-dot${i<top?' on':''}" style="${i<top?'background:'+FW_COLORS[c]+';':''}"></div>`).join('');
-    return`<div class="fw-stack"><div class="fw-label" style="color:${FW_COLORS[c]}">${c[0]} ${top}</div><div class="fw-pips-row">${pips}</div></div>`;
-  }).join('');
-  // tokens
-  const tEl=document.getElementById('tb-tok');
-  tEl.innerHTML=`<div class="tok-row"><span class="tok-label">Clues</span>${Array.from({length:MAX_C},(_,i)=>`<div class="tok ${i<game.clues?'c-on':'c-off'}"></div>`).join('')}</div>
-    <div class="tok-row"><span class="tok-label">Fuses</span>${Array.from({length:MAX_F},(_,i)=>`<div class="tok ${i<game.strikes?'f-on':'f-off'}"></div>`).join('')}</div>`;
-  // stats
-  document.getElementById('tb-stats').innerHTML=`<div class="tb-stat">Turn <strong>${game.turnN+1}</strong></div><div class="tb-stat">Deck <strong>${game.deck.length}</strong></div><div class="tb-stat">Score <strong>${game.score()}/25</strong></div>`;
+  fwEl.innerHTML='<div class="fw-stacks">'+COLORS.map(c=>{
+    const top=g.fw[c];
+    const pips=Array.from({length:5},(_,i)=>`<div class="fw-pip${i<top?' on':''}" style="${i<top?'background:'+CHX[c]+';':''}"></div>`).join('');
+    return`<div class="fw-col"><div class="fw-label" style="color:${CHX[c]}">${CLET[c]} ${top}</div><div class="fw-pips">${pips}</div></div>`;
+  }).join('')+'</div>';
+
+  document.getElementById('tb-tok').innerHTML=`<div class="tok-group">
+    <div class="tok-row"><span class="tok-lbl">Clues</span>${Array.from({length:MAX_C},(_,i)=>`<div class="tok ${i<g.clues?'c-on':'c-off'}"></div>`).join('')}</div>
+    <div class="tok-row"><span class="tok-lbl">Fuses</span>${Array.from({length:MAX_F},(_,i)=>`<div class="tok ${i<g.strikes?'f-on':'f-off'}"></div>`).join('')}</div>
+  </div>`;
+
+  const pace=g.pace();
+  document.getElementById('tb-stats').innerHTML=`
+    <div class="tb-stat">Turn <strong>${g.turnN+1}</strong></div>
+    <div class="tb-stat">Deck <strong>${g.deck.length}</strong></div>
+    <div class="tb-stat">Score <strong>${g.score()}/25</strong></div>
+    <div class="tb-stat">Pace <strong style="color:${pace<0?'#c0392b':pace<3?'#c8900a':'#1e9e50'}">${pace}</strong></div>
+  `;
 }
 
-function renderHands(){
+// ── HANDS ─────────────────────────────────────────────────
+function renderHands(g){
   const el=document.getElementById('hands');el.innerHTML='';
-  const cp=game.turn;
-  for(let p=0;p<game.n;p++){
+  const cp=g.turn;
+
+  for(let p=0;p<g.n;p++){
     const div=document.createElement('div');
-    div.className='player-row'+(p===cp?' active':'');
-    const isHumanSeat=(p===humanSeat);
-    // In director mode: see all cards face-up (you're the director)
-    // In normal mode: hide only your own current hand
-    const showHidden=(!directorMode)&&isHumanSeat&&(p===cp);
-    const isCurrentTurn=(p===cp);
-    const turnTag=isCurrentTurn?`<span class="tag turn">${directorMode&&!isHumanSeat?'controlling':'your turn'}</span>`:'';
-    const roleTag=isHumanSeat?'<span class="tag human">You</span>':'<span class="tag bot">Bot</span>';
-    div.innerHTML=`<div class="player-header"><span class="player-name">Player ${p}</span>${turnTag}${roleTag}</div>`;
+    const isHuman=p===humanSeat;
+    const isActive=p===cp;
+    const isEmpathy=empathyPlayer===p;
+    div.className='player-row'+(isActive?' active-turn':'')+(isEmpathy?' empathy-view':'');
+
+    // header
+    const hdr=document.createElement('div');hdr.className='player-header';
+    const nameEl=document.createElement('span');nameEl.className='player-name';nameEl.textContent='Player '+p;
+    hdr.appendChild(nameEl);
+    if(isActive){const t=document.createElement('span');t.className='tag turn';t.textContent=directorMode&&!isHuman?'controlling':'your turn';hdr.appendChild(t);}
+    if(isHuman){const t=document.createElement('span');t.className='tag you';t.textContent='You';hdr.appendChild(t);}
+    else{const t=document.createElement('span');t.className='tag bot';t.textContent='Bot';hdr.appendChild(t);}
+    if(isEmpathy){const t=document.createElement('span');t.className='tag empathy';t.textContent='👁 empathy';hdr.appendChild(t);}
+
+    // pace in header of active player
+    if(isActive){
+      const pb=document.createElement('span');pb.className='pace-badge';
+      pb.innerHTML=`Efficiency: <strong>${g.clueN>0?((g.score()/g.clueN).toFixed(2)):'—'}</strong>`;
+      hdr.appendChild(pb);
+    }
+    div.appendChild(hdr);
+
     const hand=document.createElement('div');hand.className='hand';
-    for(let i=0;i<game.hands[p].length;i++){
-      const card=game.hands[p][i],k=game.know[p][i];
-      if(showHidden){
-        // hidden tile — current human player's own hand in normal mode
-        const t=document.createElement('div');
-        t.className='tile hidden'+(selSlot===i?' sel':'');
-        const pig=[...k.notes].filter(n=>n.startsWith('=>'));
-        const note=pig.length?pig[pig.length-1].replace('=>','').trim():'';
-        t.innerHTML=`<div class="h-emblem">⛩</div><div class="h-label">${descK(k)}</div>${note?`<div class="h-note">${note.slice(0,18)}</div>`:''}`;
-        t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands();renderAction();};
+
+    // decide rendering mode
+    // showHidden: tile backs with pip grid (can't see color/rank)
+    const showHidden=(!directorMode)&&isHuman&&(p===cp)&&!isEmpathy;
+    // showEmpathy: show what this player sees (their tiles as hidden pip grids)
+    const showEmpathyHidden=isEmpathy&&(p!==cp||directorMode);
+
+    for(let i=0;i<g.hands[p].length;i++){
+      const card=g.hands[p][i];
+      const k=g.know[p][i];
+      const isClued=k.clues.length>0;
+      const isCrit=g.isCritical(card.color,card.rank);
+
+      // show arrow for just-given clue
+      const showArrow=g.lastClue&&g.lastClue.target===p&&g.lastClue.touched.includes(i);
+
+      if(showHidden||(showEmpathyHidden&&isHuman)){
+        // hidden tile with pip grid
+        const t=buildHiddenTile(k,i,isClued,isCrit,selSlot===i,showArrow,g);
+        if(!replayMode){
+          t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands(g);renderAction(g);};
+        }
         hand.appendChild(t);
       } else {
         // visible tile
+        const isSelectable=(directorMode&&p===cp)||false;
         const hl=clueMode&&clueTarget===p&&clueType&&((clueType==='color'&&card.color===clueVal)||(clueType==='rank'&&card.rank===clueVal));
         const dm=clueMode&&clueTarget===p&&clueType&&!hl;
-        const t=document.createElement('div');
-        // In director mode, current player's tiles are selectable
-        const isSelectable=(directorMode&&p===cp)||((!directorMode)&&isHumanSeat&&p===cp);
-        t.className='tile'+(clueMode&&p!==cp?' clueable':'')+(hl?' hl':'')+(dm?' dim':'')+(isSelectable&&!clueMode?' clueable':'');
-        t.innerHTML=tileInner(card.color,card.rank);
-        if(isSelectable&&!clueMode){
-          t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands();renderAction();};
-          if(selSlot===i)t.classList.add('hl');
+        const t=buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueMode&&p!==cp,isSelectable&&selSlot===i);
+        if(isSelectable&&!clueMode&&!replayMode){
+          t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands(g);renderAction(g);};
         }
-        if(clueMode&&p!==cp){t.onclick=()=>{clueTarget=p;renderAction();renderHands();};}
+        if(clueMode&&p!==cp&&!replayMode){t.onclick=()=>{clueTarget=p;renderAction(g);renderHands(g);};}
         hand.appendChild(t);
       }
     }
-    if(clueMode&&p!==cp){
-      div.style.cursor='pointer';
-      div.onclick=(e)=>{if(!e.target.classList.contains('tile')&&!e.target.closest('.tile')){clueTarget=p;clueType=null;clueVal=null;renderAction();renderHands();}};
+
+    // empathy toggle on opponent rows
+    if(!isHuman&&!replayMode){
+      const emp=document.createElement('button');
+      emp.className='btn';emp.style.cssText='font-size:10px;padding:3px 8px;margin-top:8px;';
+      emp.textContent=empathyPlayer===p?'👁 Hide empathy':'👁 Empathy';
+      emp.onclick=()=>{empathyPlayer=empathyPlayer===p?null:p;renderHands(g);};
+      div.appendChild(hand);div.appendChild(emp);
+    } else {
+      div.appendChild(hand);
     }
-    div.appendChild(hand);el.appendChild(div);
+
+    if(clueMode&&p!==cp&&!replayMode){
+      div.style.cursor='pointer';
+      div.onclick=(e)=>{if(!e.target.closest('.hand')&&!e.target.closest('.btn')){clueTarget=p;clueType=null;clueVal=null;renderAction(g);renderHands(g);}};
+    }
+
+    el.appendChild(div);
   }
+}
+
+function buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueable,selected){
+  const t=document.createElement('div');
+  t.className='tile'+(isClued?' clued':'')+(clueable?' clueable':'')+(hl?' hl':'')+(dm?' dim':'')+(selected?' sel':'');
+  t.innerHTML=tileInner(card.color,card.rank);
+  if(isCrit)t.innerHTML+=`<div class="tile-critical">❗</div>`;
+  if(showArrow){
+    const a=buildArrow(k.clues[k.clues.length-1]||'');
+    t.appendChild(a);
+  }
+  return t;
+}
+
+function buildHiddenTile(k,idx,isClued,isCrit,selected,showArrow,g){
+  const t=document.createElement('div');
+  t.className='tile hidden'+(isClued?' clued':'')+(selected?' sel':'');
+  t.style.cursor='pointer';
+
+  // pip grid: 5 colors × 5 ranks
+  const grid=document.createElement('div');grid.className='pip-grid';
+  for(let ri=1;ri<=5;ri++){
+    for(const c of COLORS){
+      const cell=document.createElement('div');
+      const possible=k.possible.has(c+','+ri);
+      cell.className='pip-grid-cell '+(possible?'possible':'impossible');
+      if(possible){
+        cell.style.background=CHX[c];
+        cell.style.color='rgba(255,255,255,.9)';
+        cell.textContent=ri;
+        cell.style.borderRadius='2px';
+      }
+      grid.appendChild(cell);
+    }
+  }
+  t.appendChild(grid);
+
+  // if fully identified, show the gem on top
+  if(isId(k)){
+    const{color,rank}=pairOf([...k.possible][0]);
+    t.innerHTML='';
+    t.innerHTML=tileInner(color,rank)+'<div style="position:absolute;top:1px;left:2px;font-size:8px;opacity:.5;color:#fff">?</div>';
+    if(isCrit)t.innerHTML+=`<div class="tile-critical">❗</div>`;
+  }
+
+  if(showArrow){
+    const a=buildArrow(k.clues[k.clues.length-1]||'');
+    t.appendChild(a);
+  }
+  return t;
+}
+
+function buildArrow(clueNote){
+  const wrap=document.createElement('div');wrap.className='tile-arrow';
+  const badge=document.createElement('div');badge.className='arrow-badge';badge.textContent=clueNote||'↓';
+  const body=document.createElement('div');body.className='arrow-body';
+  const head=document.createElement('div');head.className='arrow-head';
+  wrap.appendChild(badge);wrap.appendChild(body);wrap.appendChild(head);
+  // fade out arrow after 2s
+  setTimeout(()=>wrap.style.opacity='0',1500);
+  setTimeout(()=>wrap.remove(),2000);
+  wrap.style.transition='opacity .5s';
+  return wrap;
 }
 
 function tileInner(color,rank){
   const pips=Array.from({length:rank},()=>`<div class="pip" style="background:${CHX[color]}"></div>`).join('');
-  return`<div class="tile-gem" style="width:30px;height:30px;font-size:15px;background:${CHX[color]};color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,.22),0 1px 3px rgba(0,0,0,.35)">${rank}</div><div class="tile-pips">${pips}</div>`;
+  return`<div class="tile-gem" style="background:${CHX[color]};color:#fff;width:32px;height:32px;font-size:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(255,255,255,.22),0 1px 3px rgba(0,0,0,.3)">${rank}</div><div class="tile-pips">${pips}</div>`;
 }
 
-function renderAction(){
+// ── ACTION ────────────────────────────────────────────────
+function renderAction(g){
   const el=document.getElementById('action');el.innerHTML='';
-  const cp=game.turn;
-  // show action panel if: director mode (always), or it's the human's own seat
+  const cp=g.turn;
   if(!directorMode&&cp!==humanSeat)return;
   const panel=document.createElement('div');panel.className='action-panel';
-  if(clueMode)renderClue(panel); else renderMove(panel);
+  if(clueMode)renderClue(panel,g);else renderMove(panel,g);
   el.appendChild(panel);
 }
 
-function renderMove(panel){
-  const cp=game.turn;
-  panel.innerHTML=`<div class="ap-title">Your move</div><div class="ap-hint">${selSlot===null?'Click a tile in your hand to select it.':'Slot '+selSlot+' selected.'}</div>`;
+function renderMove(panel,g){
+  const cp=g.turn;
+  const isBot=directorMode&&cp!==humanSeat;
+  panel.innerHTML=`<div class="ap-title">${isBot?'Bot P'+cp+' — director\'s call':'Your move'}</div>
+    <div class="ap-hint">${selSlot===null?'Click a tile in your hand to select it, or drag to play/discard.':'Slot '+selSlot+' selected.'}</div>`;
   const row=document.createElement('div');row.className='ap-row';
-  const pb=document.createElement('button');pb.className='btn';pb.textContent='▶ Play';pb.disabled=selSlot===null;pb.onclick=()=>doAction({kind:'play',idx:selSlot});row.appendChild(pb);
-  const db=document.createElement('button');db.className='btn danger';db.textContent='✕ Discard';db.disabled=selSlot===null||game.clues>=MAX_C;db.title=game.clues>=MAX_C?"Can't discard with 8 clues":'';db.onclick=()=>doAction({kind:'discard',idx:selSlot});row.appendChild(db);
-  const cb=document.createElement('button');cb.className='btn';cb.textContent='💬 Clue';cb.disabled=game.clues<=0;cb.onclick=()=>{clueMode=true;clueTarget=null;clueType=null;clueVal=null;selSlot=null;renderHands();renderAction();};row.appendChild(cb);
-  const ab=document.createElement('button');ab.className='btn';ab.textContent='💡 Advice';ab.onclick=()=>showAdvice(panel);row.appendChild(ab);
+  const pb=btn('▶ Play',selSlot===null,()=>doAction({kind:'play',idx:selSlot}));row.appendChild(pb);
+  const db=btn('✕ Discard',selSlot===null||g.clues>=MAX_C,()=>doAction({kind:'discard',idx:selSlot}),'danger');
+  db.title=g.clues>=MAX_C?"Can't discard with 8 clues":'';row.appendChild(db);
+  const cb=btn('💬 Clue',g.clues<=0,()=>{clueMode=true;clueTarget=null;clueType=null;clueVal=null;selSlot=null;renderHands(g);renderAction(g);});row.appendChild(cb);
+  const ab=btn('💡 Bot suggestion',false,()=>showAdvice(panel,g));row.appendChild(ab);
   panel.appendChild(row);
+  if(isBot)showAdvice(panel,g);
 }
 
-function renderClue(panel){
-  const cp=game.turn;
+function btn(label,disabled,onclick,cls=''){
+  const b=document.createElement('button');
+  b.className='btn'+(cls?' '+cls:'');b.textContent=label;b.disabled=disabled;b.onclick=onclick;
+  return b;
+}
+
+function renderClue(panel,g){
+  const cp=g.turn;
   panel.innerHTML=`<div class="ap-title">Give a clue</div>`;
   const box=document.createElement('div');box.className='clue-box';
-  box.textContent=clueTarget===null?'Click a player\'s row or tiles to target them.':clueType===null?`Player ${clueTarget} selected — pick a color or rank.`:`Player ${clueTarget}: ${clueType}=${clueVal}. Send or change.`;
+  box.textContent=clueTarget===null?'Click a player row or their tiles to select them.'
+    :clueType===null?`Player ${clueTarget} selected — pick color or rank below.`
+    :`Cluing P${clueTarget}: ${clueType}=${clueVal}. Send or change.`;
   panel.appendChild(box);
   if(clueTarget!==null){
-    const tH=game.hands[clueTarget];
+    const tH=g.hands[clueTarget];
     const cp2=new Set(tH.map(c=>c.color)),rp=new Set(tH.map(c=>c.rank));
     const pr=document.createElement('div');pr.className='clue-pick';
     pr.innerHTML='<span class="clue-pick-label">Color</span>';
-    for(const c of COLORS){const sw=document.createElement('div');sw.className='cswatch'+(clueType==='color'&&clueVal===c?' on':'')+(cp2.has(c)?'':' na');sw.style.background=CHX[c];sw.title=c;if(cp2.has(c))sw.onclick=()=>{clueType='color';clueVal=c;renderHands();renderAction();};pr.appendChild(sw);}
+    for(const c of COLORS){
+      const sw=document.createElement('div');
+      sw.className='cswatch'+(clueType==='color'&&clueVal===c?' on':'')+(cp2.has(c)?'':' na');
+      sw.style.background=CHX[c];sw.title=c;
+      if(cp2.has(c))sw.onclick=()=>{clueType='color';clueVal=c;renderHands(g);renderAction(g);};
+      pr.appendChild(sw);
+    }
     pr.innerHTML+='<span class="clue-pick-label" style="margin-left:10px">Rank</span>';
-    for(let r=1;r<=5;r++){const rb=document.createElement('button');rb.className='rbtn'+(clueType==='rank'&&clueVal===r?' on':'');rb.textContent=r;rb.disabled=!rp.has(r);if(rp.has(r))rb.onclick=()=>{clueType='rank';clueVal=r;renderHands();renderAction();};pr.appendChild(rb);}
+    for(let r=1;r<=5;r++){
+      const rb=document.createElement('button');
+      rb.className='rbtn'+(clueType==='rank'&&clueVal===r?' on':'');
+      rb.textContent=r;rb.disabled=!rp.has(r);
+      if(rp.has(r))rb.onclick=()=>{clueType='rank';clueVal=r;renderHands(g);renderAction(g);};
+      pr.appendChild(rb);
+    }
     panel.appendChild(pr);
   }
   const row=document.createElement('div');row.className='ap-row';
-  const sb=document.createElement('button');sb.className='btn';sb.textContent='✓ Send';sb.disabled=clueTarget===null||clueType===null;sb.onclick=()=>doAction({kind:'clue',target:clueTarget,ct:clueType,v:clueVal});row.appendChild(sb);
-  const xb=document.createElement('button');xb.className='btn';xb.textContent='✕ Cancel';xb.onclick=()=>{clueMode=false;clueTarget=null;clueType=null;clueVal=null;renderHands();renderAction();};row.appendChild(xb);
+  const sb=btn('✓ Send clue',clueTarget===null||clueType===null,()=>doAction({kind:'clue',target:clueTarget,ct:clueType,v:clueVal}));row.appendChild(sb);
+  const xb=btn('✕ Cancel',false,()=>{clueMode=false;clueTarget=null;clueType=null;clueVal=null;renderHands(g);renderAction(g);});row.appendChild(xb);
   panel.appendChild(row);
 }
 
-function showAdvice(panel){
-  const cp=game.turn;const know=game.know[cp];
-  const acc=game.accCounts();
+function showAdvice(panel,g){
+  const cp=g.turn;const know=g.know[cp];
+  const acc=g.accCounts();
+  const{action:ba,tr}=botAct(g,cp,[]);
+  const old=panel.querySelector('.advice-rows');if(old)old.remove();
+  const div=document.createElement('div');div.className='advice-rows';div.style.marginTop='10px';
   const rows=know.map((k,i)=>{
     const weights={};let tot=0;
-    for(const p of k.possible){const{rank}=pairOf(p);const w=RC[rank]-(acc[p]||0);if(w>0){weights[p]=w;tot+=w;}}
-    let pp=0,pc=0;
-    for(const p in weights){const pr=weights[p]/tot;const{color,rank}=pairOf(p);if(game.fw[color]===rank-1)pp+=pr;if(rank>game.fw[color]&&remCount(game,color,rank)<=1)pc+=pr;}
-    return{i,pp,pc};
+    for(const p of k.possible){const{color,rank}=pairOf(p);const w=RC[rank]-(acc[p]||0);if(w>0){weights[p]=w;tot+=w;}}
+    let pp=0;
+    for(const p in weights){const pr2=weights[p]/tot;const{color,rank}=pairOf(p);if(g.fw[color]===rank-1)pp+=pr2;}
+    return{i,pp};
   });
-  const{action:ba,tr}=botAct(game,cp,[]);
-  const old=panel.querySelector('.advice-rows');if(old)old.remove();
-  const div=document.createElement('div');div.className='advice-rows';
-  div.innerHTML=rows.map(r=>`<div class="adv-row"><span>Slot ${r.i}</span><span>Play <strong>${(r.pp*100).toFixed(0)}%</strong> · Crit discard <strong>${(r.pc*100).toFixed(0)}%</strong></span></div>`).join('');
-  div.innerHTML+=`<div class="adv-rec">Bot would: ${tr[tr.length-1]||'?'}</div>`;
-  const applyBtn=document.createElement('button');applyBtn.className='btn';applyBtn.style.marginTop='8px';applyBtn.textContent='→ Apply';applyBtn.onclick=()=>doAction(ba);
+  div.innerHTML=rows.map(r=>`<div class="adv-row"><span>Slot ${r.i}</span><span>Play chance: <strong>${(r.pp*100).toFixed(0)}%</strong></span></div>`).join('');
+  div.innerHTML+=`<div class="adv-rec" style="margin-top:6px">🤖 Bot: ${tr[tr.length-1]||'?'}</div>`;
+  const applyBtn=btn('→ Apply bot move',false,()=>doAction(ba));
+  applyBtn.style.marginTop='8px';
   div.appendChild(applyBtn);
   panel.appendChild(div);
 }
 
-function renderSidebar(){
-  renderDiscard();
-  renderLog();
-  renderTrace();
-}
+// ── SIDEBAR ───────────────────────────────────────────────
+function renderSidebar(g){renderDiscard(g);renderLog(g);renderTrace();}
 
-function renderDiscard(){
+function renderDiscard(g){
   const el=document.getElementById('pane-discard');
-  if(game.disc.length===0){el.innerHTML='<div class="disc-empty">No discards yet.</div>';return;}
+  if(g.disc.length===0){el.innerHTML='<div class="disc-empty">No discards yet.</div>';return;}
   const byColor={};for(const c of COLORS)byColor[c]=[];
-  for(const card of game.disc)byColor[card.color].push(card.rank);
+  for(const card of g.disc)byColor[card.color].push(card.rank);
   el.innerHTML='';
   for(const color of COLORS){
     const ranks=byColor[color];if(ranks.length===0)continue;
@@ -732,33 +922,46 @@ function renderDiscard(){
     group.innerHTML=`<div class="disc-color-header"><div class="disc-color-bar" style="background:${CHX[color]}"></div><div class="disc-color-name" style="color:${CHX[color]}">${color}</div></div>`;
     const tilesDiv=document.createElement('div');tilesDiv.className='disc-tiles';
     const sorted=ranks.slice().sort((a,b)=>a-b);
+    const countMap={};for(const r of sorted)countMap[r]=(countMap[r]||0)+1;
+    const seen={};
     for(const rank of sorted){
-      const total=RC[rank];
-      const discardedOfThis=sorted.filter(r=>r===rank).length;
-      const remaining=total-discardedOfThis-(game.fw[color]>=rank?1:0);
-      const isCritical=remaining<=0;
-      const isLast=remaining===1;
+      if(seen[rank])continue;seen[rank]=true;
+      const discN=countMap[rank];
+      const played=g.fw[color]>=rank;
+      const remaining=RC[rank]-discN-(played?1:0);
+      const isCrit=remaining<=0;const isLast=remaining===1;
       const dt=document.createElement('div');
-      dt.className='disc-tile'+(isCritical?' critical':isLast?' last':'');
-      dt.title=`${color} ${rank} — ${remaining<=0?'eliminated!':remaining===1?'last copy!':remaining+' left'}`;
+      dt.className='disc-tile'+(isCrit?' critical':isLast?' last':'');
+      dt.title=`${color} ${rank} — ${isCrit?'eliminated!':isLast?'last copy!':remaining+' left'}`;
       const pips=Array.from({length:rank},()=>`<div class="disc-pip" style="background:${CHX[color]}"></div>`).join('');
       dt.innerHTML=`<div class="disc-gem" style="background:${CHX[color]};color:#fff">${rank}</div><div class="disc-pips">${pips}</div>`;
+      if(discN>1)dt.innerHTML+=`<div style="position:absolute;bottom:1px;right:2px;font-size:7px;font-weight:800;color:#c0392b">×${discN}</div>`;
       tilesDiv.appendChild(dt);
     }
-    group.appendChild(tilesDiv);
-    el.appendChild(group);
+    group.appendChild(tilesDiv);el.appendChild(group);
   }
-  // legend
   const leg=document.createElement('div');
   leg.style.cssText='margin-top:10px;font-size:10px;color:var(--ink3);border-top:1px solid var(--border);padding-top:8px;display:flex;flex-direction:column;gap:3px;';
   leg.innerHTML='<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;outline:2px solid #c0392b;outline-offset:1px;display:inline-block"></span>eliminated</span><span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;outline:2px solid #d4a017;outline-offset:1px;display:inline-block"></span>last copy</span>';
   el.appendChild(leg);
 }
 
-function renderLog(){
+function renderLog(g){
   const el=document.getElementById('pane-log');
-  if(game.log.length===0){el.innerHTML='<div style="font-size:11px;color:var(--ink3);font-style:italic">No moves yet.</div>';return;}
-  el.innerHTML=game.log.map((e,i)=>`<div class="log-line ${e.type}"><span class="n">${i+1}.</span>${e.text}</div>`).join('');
+  if(g.log.length===0){el.innerHTML='<div style="font-size:11px;color:var(--ink3);font-style:italic">No moves yet.</div>';return;}
+  el.innerHTML=g.log.map((e,i)=>{
+    const isCurrent=!replayMode&&i===g.log.length-1;
+    return`<div class="log-entry ${e.type}${isCurrent?' current-turn':''}" data-turn="${e.turn||0}">
+      <span class="ln">${i+1}.</span>${e.text}
+    </div>`;
+  }).join('');
+  // clicking a log entry jumps to that turn in replay
+  el.querySelectorAll('.log-entry').forEach(row=>{
+    row.addEventListener('click',()=>{
+      const turnNum=parseInt(row.dataset.turn)||0;
+      jumpToTurn(turnNum);
+    });
+  });
   el.scrollTop=el.scrollHeight;
 }
 
@@ -768,43 +971,64 @@ function renderTrace(){
   el.scrollTop=el.scrollHeight;
 }
 
+function jumpToTurn(turnNum){
+  // find the snapshot closest to that turn
+  const chain=[...snapshots,replayState()];
+  let best=0;
+  for(let i=0;i<chain.length;i++){
+    if(chain[i].game.turnN<=turnNum)best=i;
+  }
+  replaySnaps=chain;
+  replayIdx=best;
+  replayMode=true;
+  const slider=document.getElementById('replay-slider');
+  slider.max=chain.length-1;
+  slider.value=replayIdx;
+  document.getElementById('replay-bar').style.display='flex';
+  document.getElementById('replay-turn-label').textContent=`${replayIdx} / ${chain.length-1}`;
+  // switch to log tab
+  document.querySelectorAll('.sb-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sb-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelector('[data-pane="log"]').classList.add('active');
+  document.getElementById('pane-log').classList.add('active');
+  renderAll();
+}
+
+// ── ACTIONS ───────────────────────────────────────────────
 function doAction(action){
-  // save snapshot before applying
-  history.push({game:game.clone(),thinkLines:[...thinkLines]});
-  if(history.length>50)history.shift();
+  snapshots.push(replayState());
+  if(snapshots.length>80)snapshots.shift();
   document.getElementById('rewind-btn').disabled=false;
-  try{game.apply(game.turn,action);}catch(e){history.pop();toast(e.message,true);return;}
-  game.advance();selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;
+  try{game.apply(game.turn,action);}catch(e){snapshots.pop();toast(e.message,true);return;}
+  game.advance();
+  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
   render();
 }
 
+// ── GAME OVER ─────────────────────────────────────────────
 function renderGameOver(){
-  renderTopBar();renderSidebar();
+  const g=game;
+  renderTopBar(g);renderSidebar(g);
   document.getElementById('action').innerHTML='';
-  document.getElementById('hands').innerHTML='';
-  const cls=game.result==='win'?'win':game.result==='loss'?'loss':'deck_out';
-  const msg=game.result==='win'?`🎆 Perfect! Score ${game.score()}/25`:game.result==='loss'?`💥 3 strikes. Score ${game.score()}/25`:`🃏 Deck out. Score ${game.score()}/25`;
-  document.getElementById('banner').innerHTML=`<div class="go-banner ${cls}"><h2>${msg}</h2><p>${game.turnN} turns · ${game.discN} discards · ${game.clueN} clues</p><button class="btn-go" style="width:auto;padding:10px 26px;margin-top:14px" onclick="document.getElementById('game').classList.remove('on');document.getElementById('setup').style.display='flex'">Play again</button></div>`;
-  const hands=document.getElementById('hands');
-  for(let p=0;p<game.n;p++){
+  const cls=g.result==='win'?'win':g.result==='loss'?'loss':'deck_out';
+  const msg=g.result==='win'?`🎆 Perfect! Score ${g.score()}/25`:g.result==='loss'?`💥 3 strikes. Score ${g.score()}/25`:`🃏 Deck out. Score ${g.score()}/25`;
+  document.getElementById('banner').innerHTML=`<div class="go-banner ${cls}"><h2>${msg}</h2><p>${g.turnN} turns · ${g.discN} discards · ${g.clueN} clues · Pace ${g.pace()}</p><button class="btn-go" style="width:auto;padding:10px 26px;margin-top:14px" onclick="document.getElementById('game').classList.remove('on');document.getElementById('setup').style.display='flex'">Play again</button></div>`;
+  // show all hands face up
+  const hands=document.getElementById('hands');hands.innerHTML='';
+  for(let p=0;p<g.n;p++){
     const div=document.createElement('div');div.className='player-row';
     div.innerHTML=`<div class="player-header"><span class="player-name">Player ${p}</span></div>`;
     const hand=document.createElement('div');hand.className='hand';
-    for(const card of game.hands[p]){const t=document.createElement('div');t.className='tile';t.innerHTML=tileInner(card.color,card.rank);hand.appendChild(t);}
+    for(const card of g.hands[p]){
+      const t=document.createElement('div');t.className='tile';t.innerHTML=tileInner(card.color,card.rank);hand.appendChild(t);
+    }
     div.appendChild(hand);hands.appendChild(div);
   }
-  const wp=game.score()/25;
-  document.getElementById('wm-fill').style.width=Math.round(wp*100)+'%';
-  document.getElementById('wm-pct').textContent=game.score()+'/25';
+  document.getElementById('wm-fill').style.width=Math.round(g.score()/25*100)+'%';
+  document.getElementById('wm-pct').textContent=g.score()+'/25';
 }
 
-function showPass(p){
-  document.getElementById('ov-title').textContent=`Player ${p}'s turn`;
-  document.getElementById('ov-sub').textContent=`Pass the device to Player ${p}, then tap Ready.`;
-  document.getElementById('overlay').style.display='flex';
-  document.getElementById('ov-btn').onclick=()=>{document.getElementById('overlay').style.display='none';lastShown=p;renderAll();};
-}
-
+// ── UTILS ─────────────────────────────────────────────────
 function toast(msg,err=false){
   const c=document.getElementById('toasts');const t=document.createElement('div');
   t.className='toast'+(err?' err':'');t.textContent=msg;c.appendChild(t);
