@@ -243,10 +243,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tut-card{
   position:fixed;z-index:902;
   background:#fff;border-radius:12px;
-  padding:20px 22px;max-width:320px;width:90%;
-  box-shadow:0 8px 32px rgba(0,0,0,.22);
-  transition:all .3s cubic-bezier(.4,0,.2,1);
+  padding:24px 26px;max-width:380px;width:90%;
+  box-shadow:0 8px 40px rgba(0,0,0,.28);
+  /* Always centered — never moves */
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
 }
+.tut-pointer{
+  position:fixed;z-index:903;
+  pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+}
+.tut-pointer-label{
+  background:var(--accent);color:#fff;
+  font-size:11px;font-weight:700;
+  padding:4px 10px;border-radius:999px;
+  white-space:nowrap;margin-bottom:4px;
+  box-shadow:0 2px 8px rgba(26,111,181,.4);
+}
+.tut-pointer-line{width:2px;background:var(--accent);opacity:.7;}
+.tut-pointer-dot{
+  width:12px;height:12px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 0 4px rgba(26,111,181,.25);
+  animation:tut-pulse 1.5s infinite;
+}
+@keyframes tut-pulse{0%,100%{box-shadow:0 0 0 4px rgba(26,111,181,.25);}50%{box-shadow:0 0 0 8px rgba(26,111,181,.1);}}
+
 .tut-card h3{font-size:15px;font-weight:800;color:var(--accent);margin-bottom:6px;}
 .tut-card p{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:14px;}
 .tut-footer{display:flex;align-items:center;gap:8px;}
@@ -1130,6 +1154,7 @@ function startTutorial(){
   tutEls.backdrop=document.createElement('div');tutEls.backdrop.className='tut-backdrop';
   tutEls.spotlight=document.createElement('div');tutEls.spotlight.className='tut-spotlight';
   tutEls.card=document.createElement('div');tutEls.card.className='tut-card';
+  tutEls.pointer=null;
   document.body.appendChild(tutEls.backdrop);
   document.body.appendChild(tutEls.spotlight);
   document.body.appendChild(tutEls.card);
@@ -1144,11 +1169,11 @@ function showTutStep(){
   if(s.sel){
     const el=document.querySelector(s.sel);
     if(el){
-      const r=el.getBoundingClientRect(),pad=12;
+      const r=el.getBoundingClientRect(),pad=8;
       sp.style.cssText=`left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px;opacity:1;`;
-    }else sp.style.opacity='0';
-  }else sp.style.opacity='0';
-  // card
+    } else sp.style.opacity='0';
+  } else sp.style.opacity='0';
+  // card — always centered, no positioning needed
   const dots=TUTORIAL_STEPS.map((_,i)=>`<div class="tut-dot${i===tutStep?' on':''}"></div>`).join('');
   tutEls.card.innerHTML=`<h3>${s.title}</h3><p>${s.text}</p>
     <div class="tut-footer">
@@ -1156,34 +1181,46 @@ function showTutStep(){
       <button class="tut-skip" onclick="closeTutorial()">Skip</button>
       <button class="tut-btn" onclick="tutNext()">${tutStep===TUTORIAL_STEPS.length-1?'Done ✓':'Next →'}</button>
     </div>`;
-  // position card after paint
-  requestAnimationFrame(()=>posTutCard(s));
+  // pointer arrow to the spotlighted element
+  if(tutEls.pointer){tutEls.pointer.remove();tutEls.pointer=null;}
+  if(s.sel){
+    requestAnimationFrame(()=>buildPointer(s.sel,s.title));
+  }
 }
 
-function posTutCard(s){
-  const card=tutEls.card;
-  const cw=card.offsetWidth||320,ch=card.offsetHeight||180;
-  if(!s.sel||s.pos==='center'){
-    card.style.left=Math.max(16,(window.innerWidth-cw)/2)+'px';
-    card.style.top=Math.max(16,(window.innerHeight-ch)/2)+'px';
-    return;
+function buildPointer(sel,label){
+  const el=document.querySelector(sel);
+  if(!el)return;
+  const r=el.getBoundingClientRect();
+  // pick edge closest to center of screen
+  const cx=window.innerWidth/2,cy=window.innerHeight/2;
+  const elCx=r.left+r.width/2,elCy=r.top+r.height/2;
+  // pointer starts from element edge toward center
+  const ptr=document.createElement('div');
+  ptr.className='tut-pointer';
+  tutEls.pointer=ptr;
+  document.body.appendChild(ptr);
+  // line length: distance from element to ~1/4 toward center
+  const dx=cx-elCx,dy=cy-elCy;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  const lineLen=Math.min(60,dist*0.3);
+  const angle=Math.atan2(dy,dx)*180/Math.PI;
+  // position dot at element center
+  ptr.innerHTML=`<div class="tut-pointer-label">${label}</div><div class="tut-pointer-line" style="height:${lineLen}px"></div><div class="tut-pointer-dot"></div>`;
+  // place the pointer centered on the element
+  ptr.style.left=(elCx-60)+'px';
+  ptr.style.top=(elCy-r.height/2-lineLen-30)+'px';
+  // if element is below center, flip so pointer goes down
+  if(elCy>cy){
+    ptr.style.flexDirection='column-reverse';
+    ptr.style.top=(elCy+r.height/2+4)+'px';
   }
-  const el=document.querySelector(s.sel);
-  if(!el){card.style.left='50%';card.style.top='50%';return;}
-  const r=el.getBoundingClientRect(),pad=20;
-  let left=r.left,top=r.top;
-  if(s.pos==='below')top=r.bottom+pad;
-  else if(s.pos==='above')top=r.top-ch-pad;
-  else if(s.pos==='right'){left=r.right+pad;top=r.top;}
-  else if(s.pos==='left'){left=r.left-cw-pad;top=r.top;}
-  card.style.left=Math.max(8,Math.min(left,window.innerWidth-cw-8))+'px';
-  card.style.top=Math.max(8,Math.min(top,window.innerHeight-ch-8))+'px';
 }
 
 function tutNext(){tutStep++;showTutStep();}
 function closeTutorial(){
   tutActive=false;
-  Object.values(tutEls).forEach(e=>e&&e.remove());
+  Object.values(tutEls).forEach(e=>e&&e.remove&&e.remove());
   tutEls={};
 }
 
