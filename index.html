@@ -409,7 +409,7 @@ class Game{
     this.lastClue=null;
     if(action.kind==='clue'){
       if(this.clues<=0)throw new Error('no clue tokens');
-      if(action.target===p)throw new Error("can't clue yourself");
+      if(action.target===p)throw new Error("can\'t clue yourself");
       let touched=[];
       for(let i=0;i<this.hands[action.target].length;i++){
         const card=this.hands[action.target][i],k=this.know[action.target][i];
@@ -425,7 +425,7 @@ class Game{
       this.log.push({type:'clu',text:`P${p}→P${action.target}: ${action.ct}=${vStr}`,turn:this.turnN});
       this.elim();
     } else if(action.kind==='discard'){
-      if(this.clues>=MAX_C)throw new Error("can't discard with 8 clues");
+      if(this.clues>=MAX_C)throw new Error("can\'t discard with 8 clues");
       const card=this.hands[p].splice(action.idx,1)[0];this.know[p].splice(action.idx,1);
       this.disc.push(card);this.clues=Math.min(MAX_C,this.clues+1);this.discN++;
       this.log.push({type:'dis',text:`P${p} discards ${card.color[0]}${card.rank}`,turn:this.turnN});
@@ -521,7 +521,7 @@ let game=null,humanSeat=0,directorMode=false;
 let selSlot=null,clueMode=false,clueTarget=null,clueType=null,clueVal=null;
 let thinkLines=[],snapshots=[];
 let replayMode=false,replayIdx=0,replaySnaps=[];
-let empathyPlayer=null; // which player's perspective we're showing
+let empathyPlayer=null; // which player\'s perspective we\'re showing
 let winTask=null;
 
 // ── SETUP ──────────────────────────────────────────────────
@@ -609,7 +609,7 @@ function enterReplay(){
   // We keep a full snap list: snapshots[0] is oldest
   // Build complete replay chain from start
   // The replaySnaps is: [start_of_game, ...per_action_snaps]
-  // We'll use the existing snapshots array (each snap is BEFORE that action)
+  // We\'ll use the existing snapshots array (each snap is BEFORE that action)
   // snapshots[0] = game state before action 1, etc.
   // For replay, we want index 0 = initial state, index N = current state
   const chain=[...snapshots, replayState()];
@@ -740,7 +740,7 @@ function renderHands(g){
     const hand=document.createElement('div');hand.className='hand';
 
     // decide rendering mode
-    // showHidden: tile backs with pip grid (can't see color/rank)
+    // showHidden: tile backs with pip grid (can\'t see color/rank)
     const showHidden=(!directorMode)&&isHuman&&(p===cp)&&!isEmpathy;
     // showEmpathy: show what this player sees (their tiles as hidden pip grids)
     const showEmpathyHidden=isEmpathy&&(p!==cp||directorMode);
@@ -881,7 +881,7 @@ function renderMove(panel,g){
   const row=document.createElement('div');row.className='ap-row';
   const pb=btn('▶ Play',selSlot===null,()=>doAction({kind:'play',idx:selSlot}));row.appendChild(pb);
   const db=btn('✕ Discard',selSlot===null||g.clues>=MAX_C,()=>doAction({kind:'discard',idx:selSlot}),'danger');
-  db.title=g.clues>=MAX_C?"Can't discard with 8 clues":'';row.appendChild(db);
+  db.title=g.clues>=MAX_C?"Can\'t discard with 8 clues":'';row.appendChild(db);
   const cb=btn('💬 Clue',g.clues<=0,()=>{clueMode=true;clueTarget=null;clueType=null;clueVal=null;selSlot=null;renderHands(g);renderAction(g);});row.appendChild(cb);
   const ab=btn('💡 Bot suggestion',false,()=>showAdvice(panel,g));row.appendChild(ab);
   panel.appendChild(row);
@@ -1106,20 +1106,20 @@ function positionTip(e){
 
 // ── TUTORIAL SYSTEM ──────────────────────────────────────
 const TUTORIAL_STEPS=[
-  {sel:null,pos:'center',title:'Welcome to Hanabi Deluxe II',text:'A cooperative card game where you and the bots work together to build five colored firework stacks (1→5). You cannot see your own tiles — you rely on clues from teammates. Let's walk through the interface.'},
+  {sel:null,pos:'center',title:'Welcome to Hanabi Deluxe II',text:'A cooperative card game where you and the bots work together to build five colored firework stacks (1→5). You cannot see your own tiles — you rely on clues from teammates. Let\'s walk through the interface.'},
   {sel:'#tb-fw',pos:'below',title:'Fireworks Progress',text:'Five color stacks: Red, Yellow, Green, Blue, White. Each must be built 1→5 in order. Complete all five for a perfect score of 25. The dots show how far each stack has progressed.'},
   {sel:'#tb-tok',pos:'below',title:'Clues & Fuses',text:'<b>Clues (blue):</b> Start with 8. Give one to hint a teammate. Gain one by discarding or completing a 5-stack. Cannot discard when you have all 8.<br><br><b>Fuses (red):</b> 3 lives. Each misplayed card costs one. Lose all 3 and the game ends with 0 points.'},
   {sel:'#tb-stats',pos:'below',title:'Game Stats',text:'<b>Turn:</b> Current turn number.<br><b>Deck:</b> Cards left to draw. When empty, each player gets one final turn.<br><b>Score:</b> Successfully played cards.<br><b>Pace:</b> Score + Deck + Players − 25. Spare discards available. Red = running out of time.'},
   {sel:'.wm-wrap',pos:'below',title:'Win Probability',text:'Estimated chance of winning from the current game state. Calculated in the background by simulating 350 games with the bot. Updates after every move. Use it to gauge how dangerous a discard or risky play is.'},
   {sel:'#hands .player-row:first-child .hand',pos:'below',title:'Your Hand — Hidden Tiles',text:'You cannot see your own tiles! Each tile shows a 5×5 pip grid (5 colors × 5 ranks). Possible cards are shown as colored numbered cells — impossible ones are faded. As clues arrive, cells disappear. Orange border = tile has been clued.'},
-  {sel:'#hands .player-row:nth-child(2) .hand',pos:'below',title:'Opponent Hands — Visible Tiles',text:'You can see all other players' tiles. Number = rank, color = suit. The small colored dots below are rank pips. ❗ = last remaining copy of that card, discard it and that color can never be completed.'},
-  {sel:'#hands .player-row:nth-child(2)',pos:'below',title:'Empathy Mode',text:'Click the 👁 Empathy button under any opponent's hand to see it from their perspective — their tiles render as pip grids showing only what they know. Useful for understanding what they can and cannot deduce.'},
+  {sel:'#hands .player-row:nth-child(2) .hand',pos:'below',title:'Opponent Hands — Visible Tiles',text:'You can see all other players\' tiles. Number = rank, color = suit. The small colored dots below are rank pips. ❗ = last remaining copy of that card, discard it and that color can never be completed.'},
+  {sel:'#hands .player-row:nth-child(2)',pos:'below',title:'Empathy Mode',text:'Click the 👁 Empathy button under any opponent\'s hand to see it from their perspective — their tiles render as pip grids showing only what they know. Useful for understanding what they can and cannot deduce.'},
   {sel:'#action',pos:'above',title:'Action Panel',text:'On your turn, choose one of three actions:<br><br><b>▶ Play:</b> Click a tile to select it, then Play. Right card → placed on stack. Wrong card → lose a fuse.<br><b>✕ Discard:</b> Remove a tile, gain back a clue token.<br><b>💬 Clue:</b> Pick a player, then a color or rank. Arrows flash on matching tiles.'},
-  {sel:'#pane-discard',pos:'left',title:'Discard Pile',text:'All discarded tiles shown as mini-tiles.<br><br><span style="color:#c0392b">Red outline</span> = eliminated — all copies gone, that color stack can never be completed.<br><span style="color:#d4a017">Yellow outline</span> = last copy — one more discard and it's gone forever.'},
+  {sel:'#pane-discard',pos:'left',title:'Discard Pile',text:'All discarded tiles shown as mini-tiles.<br><br><span style="color:#c0392b">Red outline</span> = eliminated — all copies gone, that color stack can never be completed.<br><span style="color:#d4a017">Yellow outline</span> = last copy — one more discard and it\'s gone forever.'},
   {sel:'#rewind-btn',pos:'below',title:'Undo',text:'Step back one move at a time — works for your moves and bot moves. Up to 50 steps. Great for experimenting with different lines.'},
   {sel:'#replay-btn',pos:'below',title:'Replay / History',text:'Opens a scrubber bar so you can slide through every move. Also click any entry in the Clue Log tab to jump directly to that turn. Useful for post-game review.'},
-  {sel:'#director-btn',pos:'below',title:'Director Mode',text:'Toggle to control all players' moves yourself. All tiles become visible and you decide every action. Great for studying positions, learning the bot's strategy, or testing what-if scenarios.'},
-  {sel:null,pos:'center',title:'You're ready! 🎆',text:'A few tips to play well:<br>• Clue 1s early to get plays started fast.<br>• 5s are the only copy — always save them.<br>• Watch Pace. Negative = stop discarding.<br>• Use Bot suggestion anytime for guidance.<br>• Empathy helps you give better clues.<br><br>Good luck!'}
+  {sel:'#director-btn',pos:'below',title:'Director Mode',text:'Toggle to control all players\' moves yourself. All tiles become visible and you decide every action. Great for studying positions, learning the bot\'s strategy, or testing what-if scenarios.'},
+  {sel:null,pos:'center',title:'You\'re ready! 🎆',text:'A few tips to play well:<br>• Clue 1s early to get plays started fast.<br>• 5s are the only copy — always save them.<br>• Watch Pace. Negative = stop discarding.<br>• Use Bot suggestion anytime for guidance.<br>• Empathy helps you give better clues.<br><br>Good luck!'}
 ];
 
 let tutStep=0,tutActive=false,tutEls={};
@@ -1200,19 +1200,19 @@ const ACTION_TIPS={
   'Play':'<b>Play a tile</b><br>Select a tile from your hand, then click Play. Correct next card in its color → placed on the stack. Wrong card → lose a fuse.',
   'Discard':'<b>Discard a tile</b><br>Remove a tile from your hand and add a clue token back to the pool. Disabled when you already have 8 clues.',
   'Clue':'<b>Give a clue</b><br>Select a player, then pick a color or rank. All matching tiles get arrows. Costs one clue token.',
-  'Bot suggestion':'<b>Bot suggestion</b><br>Shows per-slot play probabilities and the AI's recommended move. Click "Apply bot move" to execute it.',
-  'Apply bot move':'<b>Apply</b><br>Execute the bot's recommended action immediately.',
+  'Bot suggestion':'<b>Bot suggestion</b><br>Shows per-slot play probabilities and the AI\'s recommended move. Click "Apply bot move" to execute it.',
+  'Apply bot move':'<b>Apply</b><br>Execute the bot\'s recommended action immediately.',
   'Send clue':'<b>Send</b><br>Confirm and deliver the selected clue.',
   'Cancel':'<b>Cancel</b><br>Return to the main action panel.',
-  'Empathy':'<b>Empathy</b><br>Toggle seeing this player's hand as they see it — a pip grid showing only what their clues have revealed.',
+  'Empathy':'<b>Empathy</b><br>Toggle seeing this player\'s hand as they see it — a pip grid showing only what their clues have revealed.',
 };
 const mo=new MutationObserver(()=>{
   document.querySelectorAll('.btn,.rbtn,.cswatch').forEach(el=>{
     if(el.dataset.tipAdded)return;
     const lbl=(el.textContent||'').replace(/^[▶✕💬💡→✓↩⏮🎬?👁 ]*/,'').trim();
     for(const k in ACTION_TIPS){if(lbl.toLowerCase().includes(k.toLowerCase())){el.dataset.tip=ACTION_TIPS[k];el.dataset.tipAdded='1';break;}}
-    if(el.classList.contains('cswatch')&&el.title&&!el.dataset.tipAdded){el.dataset.tip=`<b>Clue: ${el.title}</b><br>Highlights all ${el.title} tiles in the target player's hand.`;el.dataset.tipAdded='1';}
-    if(el.classList.contains('rbtn')&&/^[1-5]$/.test((el.textContent||'').trim())&&!el.dataset.tipAdded){const r=(el.textContent||'').trim();el.dataset.tip=`<b>Rank ${r} clue</b><br>Highlights all ${r}s in the target player's hand.`;el.dataset.tipAdded='1';}
+    if(el.classList.contains('cswatch')&&el.title&&!el.dataset.tipAdded){el.dataset.tip=`<b>Clue: ${el.title}</b><br>Highlights all ${el.title} tiles in the target player\'s hand.`;el.dataset.tipAdded='1';}
+    if(el.classList.contains('rbtn')&&/^[1-5]$/.test((el.textContent||'').trim())&&!el.dataset.tipAdded){const r=(el.textContent||'').trim();el.dataset.tip=`<b>Rank ${r} clue</b><br>Highlights all ${r}s in the target player\'s hand.`;el.dataset.tipAdded='1';}
   });
 });
 mo.observe(document.body,{childList:true,subtree:true});
