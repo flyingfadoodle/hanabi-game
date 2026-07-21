@@ -215,6 +215,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 @keyframes sli{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ── TOOLTIP ── */
+[data-tip]{position:relative;}
+.tipbox{
+  position:fixed;z-index:500;
+  background:#1e1c18;color:#f0ead8;
+  font-size:12px;line-height:1.55;
+  padding:9px 13px;border-radius:8px;
+  max-width:240px;pointer-events:none;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);
+  opacity:0;transition:opacity .15s;
+  white-space:normal;
+}
+.tipbox.visible{opacity:1;}
+.tipbox b{color:#c8d8f0;}
+
+/* ── TUTORIAL OVERLAY ── */
+.tut-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;pointer-events:none;}
+.tut-spotlight{
+  position:fixed;z-index:901;
+  border-radius:10px;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.55);
+  pointer-events:none;
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+}
+.tut-card{
+  position:fixed;z-index:902;
+  background:#fff;border-radius:12px;
+  padding:20px 22px;max-width:320px;width:90%;
+  box-shadow:0 8px 32px rgba(0,0,0,.22);
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+.tut-card h3{font-size:15px;font-weight:800;color:var(--accent);margin-bottom:6px;}
+.tut-card p{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:14px;}
+.tut-footer{display:flex;align-items:center;gap:8px;}
+.tut-progress{flex:1;font-size:11px;color:var(--ink3);}
+.tut-dots{display:flex;gap:4px;margin-bottom:2px;}
+.tut-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);}
+.tut-dot.on{background:var(--accent);}
+.tut-btn{background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;padding:8px 18px;cursor:pointer;font-family:inherit;}
+.tut-skip{background:none;border:none;color:var(--ink3);font-size:12px;cursor:pointer;font-family:inherit;padding:4px;}
+.tut-skip:hover{color:var(--ink);}
 </style>
 </head>
 <body>
@@ -226,11 +268,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     <div class="sub">Cooperative fireworks · 50 tiles · 8 clues · 3 fuses</div>
     <div class="field">
       <label>Players</label>
-      <select id="pc"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select>
+      <select id="pc" data-tip="<b>Number of players</b><br>2–5 players. More players = smaller hands (4 cards each for 4–5 players, 5 cards each for 2–3). Fewer players means harder coordination."><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select>
     </div>
     <div class="field">
       <label>Seed (optional)</label>
-      <input id="seed" type="number" placeholder="leave blank for random">
+      <input id="seed" type="number" placeholder="leave blank for random" data-tip="<b>Seed</b><br>A number that determines which deck order you get. Share a seed with someone else and you'll both get the exact same deal — useful for comparing strategies or replaying a specific game.">
     </div>
     <div class="field">
       <label>Your seat</label>
@@ -245,6 +287,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <div class="field-hint" id="mode-desc">You play your seat — bots move automatically.</div>
     </div>
     <button class="btn-go" id="startbtn">Start game →</button>
+    <button class="btn-go" id="tutorial-setup-btn" style="margin-top:10px;background:var(--surface2);color:var(--accent);border:1px solid var(--accent)">📖 How to play</button>
   </div>
 </div>
 
@@ -252,14 +295,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <div id="game">
   <div class="topbar">
     <div class="tb-seg"><span class="tb-title">Hanabi II</span></div>
-    <div class="tb-seg" id="tb-fw"></div>
-    <div class="tb-seg" id="tb-tok"></div>
-    <div class="tb-seg" id="tb-stats"></div>
+    <div class="tb-seg" id="tb-fw" data-tip="<b>Fireworks</b><br>Current progress on each color stack. Each color must be completed 1→5 in order. Complete all 5 stacks for a perfect score of 25."></div>
+    <div class="tb-seg" id="tb-tok" data-tip="<b>Clues &amp; Fuses</b><br><b>Clues (blue):</b> You start with 8. Spend one to give a hint. Gain one back by discarding or completing a 5-stack. Can't discard when you have all 8.<br><b>Fuses (red):</b> 3 strikes. Each misplayed card costs one. Lose all 3 and the game ends immediately with 0 points."></div>
+    <div class="tb-seg" id="tb-stats" data-tip="<b>Stats</b><br><b>Turn:</b> Current turn number.<br><b>Deck:</b> Cards remaining to draw.<br><b>Score:</b> Cards successfully played.<br><b>Pace:</b> Score + Deck + Players − 25. How many extra discards the team can afford. Negative means you're behind."></div>
     <div class="tb-seg"><div class="wm-wrap"><div class="wm-lbl"><span>Win odds</span><span id="wm-pct">—</span></div><div class="wm-track"><div class="wm-fill" id="wm-fill" style="width:0%"></div></div></div></div>
     <div class="tb-seg" style="gap:6px">
-      <button class="btn" id="rewind-btn" disabled title="Undo">↩ Undo</button>
-      <button class="btn" id="replay-btn" title="Browse history">⏮ Replay</button>
-      <button class="btn" id="director-btn" style="display:none">🎬 Director</button>
+      <button class="btn" id="rewind-btn" disabled data-tip="<b>Undo</b><br>Step back one action. Works for both your moves and bot moves. Up to 50 undos available.">↩ Undo</button>
+      <button class="btn" id="replay-btn" data-tip="<b>Replay</b><br>Opens a timeline scrubber so you can step through every move in the game. Click any entry in the Clue Log to jump to that turn.">⏮ Replay</button>
+      <button class="btn" id="director-btn" style="display:none" data-tip="<b>Director mode</b><br>Toggle whether you control all players' moves. In Director mode, all cards are visible and you decide every action for every player — great for studying positions or experimenting.">🎬 Director</button>
+      <button class="btn" id="tut-btn" data-tip="<b>Tutorial</b><br>Step-by-step walkthrough of every part of the interface.">? Tutorial</button>
       <button class="btn" id="newgame-btn">New game</button>
     </div>
   </div>
@@ -1027,6 +1071,152 @@ function renderGameOver(){
   document.getElementById('wm-fill').style.width=Math.round(g.score()/25*100)+'%';
   document.getElementById('wm-pct').textContent=g.score()+'/25';
 }
+
+
+// ── TOOLTIP SYSTEM ──────────────────────────────────────
+const tipbox=document.createElement('div');
+tipbox.className='tipbox';
+document.body.appendChild(tipbox);
+let tipTimer=null;
+
+document.addEventListener('mouseover',e=>{
+  const el=e.target.closest('[data-tip]');
+  if(!el)return;
+  clearTimeout(tipTimer);
+  tipTimer=setTimeout(()=>{
+    tipbox.innerHTML=el.dataset.tip;
+    tipbox.classList.add('visible');
+    positionTip(e);
+  },350);
+});
+document.addEventListener('mousemove',e=>{
+  if(tipbox.classList.contains('visible'))positionTip(e);
+});
+document.addEventListener('mouseout',e=>{
+  const el=e.target.closest('[data-tip]');
+  if(el){clearTimeout(tipTimer);tipbox.classList.remove('visible');}
+});
+function positionTip(e){
+  const w=tipbox.offsetWidth||240,h=tipbox.offsetHeight||80;
+  let left=e.clientX+14,top=e.clientY+14;
+  if(left+w>window.innerWidth-8)left=e.clientX-w-10;
+  if(top+h>window.innerHeight-8)top=e.clientY-h-10;
+  tipbox.style.left=left+'px';tipbox.style.top=top+'px';
+}
+
+// ── TUTORIAL SYSTEM ──────────────────────────────────────
+const TUTORIAL_STEPS=[
+  {sel:null,pos:'center',title:'Welcome to Hanabi Deluxe II',text:'A cooperative card game where you and the bots work together to build five colored firework stacks (1→5). You cannot see your own tiles — you rely on clues from teammates. Let's walk through the interface.'},
+  {sel:'#tb-fw',pos:'below',title:'Fireworks Progress',text:'Five color stacks: Red, Yellow, Green, Blue, White. Each must be built 1→5 in order. Complete all five for a perfect score of 25. The dots show how far each stack has progressed.'},
+  {sel:'#tb-tok',pos:'below',title:'Clues & Fuses',text:'<b>Clues (blue):</b> Start with 8. Give one to hint a teammate. Gain one by discarding or completing a 5-stack. Cannot discard when you have all 8.<br><br><b>Fuses (red):</b> 3 lives. Each misplayed card costs one. Lose all 3 and the game ends with 0 points.'},
+  {sel:'#tb-stats',pos:'below',title:'Game Stats',text:'<b>Turn:</b> Current turn number.<br><b>Deck:</b> Cards left to draw. When empty, each player gets one final turn.<br><b>Score:</b> Successfully played cards.<br><b>Pace:</b> Score + Deck + Players − 25. Spare discards available. Red = running out of time.'},
+  {sel:'.wm-wrap',pos:'below',title:'Win Probability',text:'Estimated chance of winning from the current game state. Calculated in the background by simulating 350 games with the bot. Updates after every move. Use it to gauge how dangerous a discard or risky play is.'},
+  {sel:'#hands .player-row:first-child .hand',pos:'below',title:'Your Hand — Hidden Tiles',text:'You cannot see your own tiles! Each tile shows a 5×5 pip grid (5 colors × 5 ranks). Possible cards are shown as colored numbered cells — impossible ones are faded. As clues arrive, cells disappear. Orange border = tile has been clued.'},
+  {sel:'#hands .player-row:nth-child(2) .hand',pos:'below',title:'Opponent Hands — Visible Tiles',text:'You can see all other players' tiles. Number = rank, color = suit. The small colored dots below are rank pips. ❗ = last remaining copy of that card, discard it and that color can never be completed.'},
+  {sel:'#hands .player-row:nth-child(2)',pos:'below',title:'Empathy Mode',text:'Click the 👁 Empathy button under any opponent's hand to see it from their perspective — their tiles render as pip grids showing only what they know. Useful for understanding what they can and cannot deduce.'},
+  {sel:'#action',pos:'above',title:'Action Panel',text:'On your turn, choose one of three actions:<br><br><b>▶ Play:</b> Click a tile to select it, then Play. Right card → placed on stack. Wrong card → lose a fuse.<br><b>✕ Discard:</b> Remove a tile, gain back a clue token.<br><b>💬 Clue:</b> Pick a player, then a color or rank. Arrows flash on matching tiles.'},
+  {sel:'#pane-discard',pos:'left',title:'Discard Pile',text:'All discarded tiles shown as mini-tiles.<br><br><span style="color:#c0392b">Red outline</span> = eliminated — all copies gone, that color stack can never be completed.<br><span style="color:#d4a017">Yellow outline</span> = last copy — one more discard and it's gone forever.'},
+  {sel:'#rewind-btn',pos:'below',title:'Undo',text:'Step back one move at a time — works for your moves and bot moves. Up to 50 steps. Great for experimenting with different lines.'},
+  {sel:'#replay-btn',pos:'below',title:'Replay / History',text:'Opens a scrubber bar so you can slide through every move. Also click any entry in the Clue Log tab to jump directly to that turn. Useful for post-game review.'},
+  {sel:'#director-btn',pos:'below',title:'Director Mode',text:'Toggle to control all players' moves yourself. All tiles become visible and you decide every action. Great for studying positions, learning the bot's strategy, or testing what-if scenarios.'},
+  {sel:null,pos:'center',title:'You're ready! 🎆',text:'A few tips to play well:<br>• Clue 1s early to get plays started fast.<br>• 5s are the only copy — always save them.<br>• Watch Pace. Negative = stop discarding.<br>• Use Bot suggestion anytime for guidance.<br>• Empathy helps you give better clues.<br><br>Good luck!'}
+];
+
+let tutStep=0,tutActive=false,tutEls={};
+
+function startTutorial(){
+  if(tutActive)closeTutorial();
+  tutActive=true;tutStep=0;
+  tutEls.backdrop=document.createElement('div');tutEls.backdrop.className='tut-backdrop';
+  tutEls.spotlight=document.createElement('div');tutEls.spotlight.className='tut-spotlight';
+  tutEls.card=document.createElement('div');tutEls.card.className='tut-card';
+  document.body.appendChild(tutEls.backdrop);
+  document.body.appendChild(tutEls.spotlight);
+  document.body.appendChild(tutEls.card);
+  showTutStep();
+}
+
+function showTutStep(){
+  if(tutStep>=TUTORIAL_STEPS.length){closeTutorial();return;}
+  const s=TUTORIAL_STEPS[tutStep];
+  // spotlight
+  const sp=tutEls.spotlight;
+  if(s.sel){
+    const el=document.querySelector(s.sel);
+    if(el){
+      const r=el.getBoundingClientRect(),pad=12;
+      sp.style.cssText=`left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px;opacity:1;`;
+    }else sp.style.opacity='0';
+  }else sp.style.opacity='0';
+  // card
+  const dots=TUTORIAL_STEPS.map((_,i)=>`<div class="tut-dot${i===tutStep?' on':''}"></div>`).join('');
+  tutEls.card.innerHTML=`<h3>${s.title}</h3><p>${s.text}</p>
+    <div class="tut-footer">
+      <div class="tut-progress"><div class="tut-dots">${dots}</div>${tutStep+1} / ${TUTORIAL_STEPS.length}</div>
+      <button class="tut-skip" onclick="closeTutorial()">Skip</button>
+      <button class="tut-btn" onclick="tutNext()">${tutStep===TUTORIAL_STEPS.length-1?'Done ✓':'Next →'}</button>
+    </div>`;
+  // position card after paint
+  requestAnimationFrame(()=>posTutCard(s));
+}
+
+function posTutCard(s){
+  const card=tutEls.card;
+  const cw=card.offsetWidth||320,ch=card.offsetHeight||180;
+  if(!s.sel||s.pos==='center'){
+    card.style.left=Math.max(16,(window.innerWidth-cw)/2)+'px';
+    card.style.top=Math.max(16,(window.innerHeight-ch)/2)+'px';
+    return;
+  }
+  const el=document.querySelector(s.sel);
+  if(!el){card.style.left='50%';card.style.top='50%';return;}
+  const r=el.getBoundingClientRect(),pad=20;
+  let left=r.left,top=r.top;
+  if(s.pos==='below')top=r.bottom+pad;
+  else if(s.pos==='above')top=r.top-ch-pad;
+  else if(s.pos==='right'){left=r.right+pad;top=r.top;}
+  else if(s.pos==='left'){left=r.left-cw-pad;top=r.top;}
+  card.style.left=Math.max(8,Math.min(left,window.innerWidth-cw-8))+'px';
+  card.style.top=Math.max(8,Math.min(top,window.innerHeight-ch-8))+'px';
+}
+
+function tutNext(){tutStep++;showTutStep();}
+function closeTutorial(){
+  tutActive=false;
+  Object.values(tutEls).forEach(e=>e&&e.remove());
+  tutEls={};
+}
+
+document.getElementById('tut-btn').addEventListener('click',startTutorial);
+document.getElementById('tutorial-setup-btn').addEventListener('click',()=>{
+  const n=parseInt(document.getElementById('pc').value);
+  const sv=document.getElementById('seed').value;
+  startGame(n,sv===''?null:parseInt(sv));
+  setTimeout(startTutorial,500);
+});
+
+// Dynamic tips on action buttons via MutationObserver
+const ACTION_TIPS={
+  'Play':'<b>Play a tile</b><br>Select a tile from your hand, then click Play. Correct next card in its color → placed on the stack. Wrong card → lose a fuse.',
+  'Discard':'<b>Discard a tile</b><br>Remove a tile from your hand and add a clue token back to the pool. Disabled when you already have 8 clues.',
+  'Clue':'<b>Give a clue</b><br>Select a player, then pick a color or rank. All matching tiles get arrows. Costs one clue token.',
+  'Bot suggestion':'<b>Bot suggestion</b><br>Shows per-slot play probabilities and the AI's recommended move. Click "Apply bot move" to execute it.',
+  'Apply bot move':'<b>Apply</b><br>Execute the bot's recommended action immediately.',
+  'Send clue':'<b>Send</b><br>Confirm and deliver the selected clue.',
+  'Cancel':'<b>Cancel</b><br>Return to the main action panel.',
+  'Empathy':'<b>Empathy</b><br>Toggle seeing this player's hand as they see it — a pip grid showing only what their clues have revealed.',
+};
+const mo=new MutationObserver(()=>{
+  document.querySelectorAll('.btn,.rbtn,.cswatch').forEach(el=>{
+    if(el.dataset.tipAdded)return;
+    const lbl=(el.textContent||'').replace(/^[▶✕💬💡→✓↩⏮🎬?👁 ]*/,'').trim();
+    for(const k in ACTION_TIPS){if(lbl.toLowerCase().includes(k.toLowerCase())){el.dataset.tip=ACTION_TIPS[k];el.dataset.tipAdded='1';break;}}
+    if(el.classList.contains('cswatch')&&el.title&&!el.dataset.tipAdded){el.dataset.tip=`<b>Clue: ${el.title}</b><br>Highlights all ${el.title} tiles in the target player's hand.`;el.dataset.tipAdded='1';}
+    if(el.classList.contains('rbtn')&&/^[1-5]$/.test((el.textContent||'').trim())&&!el.dataset.tipAdded){const r=(el.textContent||'').trim();el.dataset.tip=`<b>Rank ${r} clue</b><br>Highlights all ${r}s in the target player's hand.`;el.dataset.tipAdded='1';}
+  });
+});
+mo.observe(document.body,{childList:true,subtree:true});
+
 
 // ── UTILS ─────────────────────────────────────────────────
 function toast(msg,err=false){
