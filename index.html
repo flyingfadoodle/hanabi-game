@@ -232,7 +232,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tipbox b{color:#c8d8f0;}
 
 /* ── TUTORIAL OVERLAY ── */
-.tut-backdrop{position:fixed;inset:0;z-index:900;pointer-events:none;}
+
 .tut-spotlight{
   position:fixed;z-index:902;
   border-radius:10px;
@@ -1183,7 +1183,6 @@ let tutStep=0,tutActive=false,tutEls={};
 function startTutorial(){
   if(tutActive)closeTutorial();
   tutActive=true;tutStep=0;
-  tutEls.backdrop=document.createElement('div');tutEls.backdrop.className='tut-backdrop';
   tutEls.spotlight=document.createElement('div');tutEls.spotlight.className='tut-spotlight';
   tutEls.card=document.createElement('div');tutEls.card.className='tut-card';
   tutEls.pointer=null;
@@ -1192,7 +1191,6 @@ function startTutorial(){
   tutEls.dimBot=document.createElement('div');tutEls.dimBot.className='tut-dim';
   tutEls.dimLeft=document.createElement('div');tutEls.dimLeft.className='tut-dim';
   tutEls.dimRight=document.createElement('div');tutEls.dimRight.className='tut-dim';
-  document.body.appendChild(tutEls.backdrop);
   document.body.appendChild(tutEls.dimTop);document.body.appendChild(tutEls.dimBot);
   document.body.appendChild(tutEls.dimLeft);document.body.appendChild(tutEls.dimRight);
   document.body.appendChild(tutEls.spotlight);
