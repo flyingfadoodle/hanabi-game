@@ -595,7 +595,7 @@ function winProb(g,N=350){
 
 // ── STATE ──────────────────────────────────────────────────
 let game=null,humanSeat=0,directorMode=false;
-let selSlot=null,clueMode=false,clueTarget=null,clueType=null,clueVal=null;
+let selSlot=null,selPlayer=null,clueMode=false,clueTarget=null,clueType=null,clueVal=null;
 let thinkLines=[],snapshots=[];
 let replayMode=false,replayIdx=0,replaySnaps=[];
 let empathyPlayer=null; // which player\'s perspective we\'re showing
@@ -654,7 +654,7 @@ document.querySelectorAll('.sb-tab').forEach(tab=>{
 function startGame(n,seed){
   game=new Game(n,seed);thinkLines=[];snapshots=[];
   replayMode=false;replaySnaps=[replayState()];
-  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
+  selSlot=null;selPlayer=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
   document.getElementById('setup').style.display='none';
   document.getElementById('game').classList.add('on');
   document.getElementById('replay-bar').style.display='none';
@@ -673,7 +673,7 @@ function doUndo(){
   if(snapshots.length===0)return;
   const snap=snapshots.pop();
   game=snap.game;thinkLines=snap.thinkLines;
-  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
+  selSlot=null;selPlayer=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
   document.getElementById('rewind-btn').disabled=snapshots.length===0;
   // rebuild replaySnaps
   replaySnaps=[replayState()];
@@ -833,9 +833,9 @@ function renderHands(g){
 
       if(showHidden||(showEmpathyHidden&&isHuman)){
         // hidden tile with pip grid
-        const t=buildHiddenTile(k,i,isClued,isCrit,selSlot===i,showArrow,g);
+        const t=buildHiddenTile(k,i,isClued,isCrit,selSlot===i&&selPlayer===p,showArrow,g);
         if(!replayMode){
-          t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands(g);renderAction(g);};
+          t.onclick=()=>{if(selSlot===i&&selPlayer===p){selSlot=null;selPlayer=null;}else{selSlot=i;selPlayer=p;}clueMode=false;renderHands(g);renderAction(g);};
         }
         hand.appendChild(t);
       } else {
@@ -843,7 +843,7 @@ function renderHands(g){
         const isSelectable=directorMode&&!clueMode;
         const hl=clueMode&&clueTarget===p&&clueType&&((clueType==='color'&&card.color===clueVal)||(clueType==='rank'&&card.rank===clueVal));
         const dm=clueMode&&clueTarget===p&&clueType&&!hl;
-        const t=buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueMode&&p!==cp,isSelectable&&selSlot===i,p,i);
+        const t=buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueMode&&p!==cp,isSelectable&&selSlot===i&&selPlayer===p,p,i);
         if(isSelectable&&!clueMode&&!replayMode){
           t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands(g);renderAction(g);};
         }
@@ -1135,7 +1135,7 @@ function doAction(action){
   document.getElementById('rewind-btn').disabled=false;
   try{game.apply(game.turn,action);}catch(e){snapshots.pop();toast(e.message,true);return;}
   game.advance();
-  selSlot=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
+  selSlot=null;selPlayer=null;clueMode=false;clueTarget=null;clueType=null;clueVal=null;empathyPlayer=null;
   render();
 }
 
