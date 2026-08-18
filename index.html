@@ -324,13 +324,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .te-cell{
   aspect-ratio:1;border-radius:7px;border:2px solid transparent;
   display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:13px;color:#fff;cursor:pointer;
-  transition:transform .1s,border-color .1s;
+  font-weight:800;font-size:15px;color:#fff;cursor:pointer;
+  transition:transform .1s,border-color .1s,opacity .1s;
   position:relative;
+  box-shadow:0 2px 4px rgba(0,0,0,.2);
 }
 .te-cell:hover{transform:scale(1.1);}
-.te-cell.selected{border-color:#000;transform:scale(1.12);}
-.te-cell.unavailable{opacity:.2;cursor:not-allowed;}
+.te-cell.selected{border-color:#fff;outline:3px solid var(--accent);outline-offset:2px;transform:scale(1.1);}
+.te-cell.unavailable{opacity:.15;cursor:not-allowed;filter:grayscale(.5);}
 .te-cell.unavailable:hover{transform:none;}
 .te-cell .te-count{position:absolute;bottom:2px;right:3px;font-size:8px;font-weight:700;opacity:.85;}
 .te-footer{display:flex;justify-content:flex-end;gap:8px;}
@@ -1357,112 +1358,77 @@ function openTileEditor(p, idx, g) {
 
   const card = g.hands[p][idx];
 
-  // Build pool: all cards not in played stacks, not in discard, not in hands (except the one being replaced)
-  const pool = {}; // key -> count available
-  // start with full deck counts
+  // Build available pool
+  const pool = {};
   for(const c of COLORS) for(const r of [1,2,3,4,5]) pool[c+','+r] = RC[r];
-  // subtract played
   for(const c of COLORS) for(let r=1; r<=g.fw[c]; r++) pool[c+','+r]--;
-  // subtract discarded
   for(const dc of g.disc) pool[dc.color+','+dc.rank]--;
-  // subtract all hand cards except the one being edited
   for(let pp=0; pp<g.n; pp++) {
     for(let ii=0; ii<g.hands[pp].length; ii++) {
-      if(pp===p && ii===idx) continue; // skip the card being replaced
+      if(pp===p && ii===idx) continue;
       const hc = g.hands[pp][ii];
       pool[hc.color+','+hc.rank]--;
     }
   }
-  // subtract remaining deck cards
   for(const dc of g.deck) pool[dc.color+','+dc.rank]--;
 
-  let selectedColor = card.color;
-  let selectedRank = card.rank;
-
-  function buildGrid() {
-    const grid = document.createElement('div');
-    grid.className = 'te-grid';
-    for(const r of [1,2,3,4,5]) {
-      for(const c of COLORS) {
-        const key = c+','+r;
-        const avail = (pool[key]||0) + (c===card.color&&r===card.rank?1:0); // add back current card
-        const isSelected = c===selectedColor && r===selectedRank;
-        const isUnavail = avail <= 0 && !isSelected;
-        const cell = document.createElement('div');
-        cell.className = 'te-cell'+(isSelected?' selected':'')+(isUnavail?' unavailable':'');
-        cell.style.background = CHX[c];
-        cell.innerHTML = r + (avail>1?`<span class="te-count">×${avail}</span>`:'');
-        cell.title = `${c} ${r} — ${avail} available`;
-        if(!isUnavail) {
-          cell.onclick = () => {
-            selectedColor = c; selectedRank = r;
-            // re-render grid
-            const newGrid = buildGrid();
-            grid.replaceWith(newGrid);
-          };
-        }
-        grid.appendChild(cell);
-      }
-    }
-    return grid;
-  }
+  // State
+  let selC = card.color, selR = card.rank;
 
   const overlay = document.createElement('div');
   overlay.className = 'tile-editor-overlay';
-  overlay.onclick = (e) => { if(e.target===overlay) overlay.remove(); tileEditorEl=null; };
+  overlay.onclick = (e) => { if(e.target===overlay){overlay.remove();tileEditorEl=null;} };
 
   const editor = document.createElement('div');
   editor.className = 'tile-editor';
-  editor.innerHTML = `<h4>Edit tile — Player ${p}, slot ${idx}</h4>
-    <div class="te-sub">Current: ${card.color} ${card.rank}. Pick a replacement. Only available cards shown.</div>`;
 
-  const gridWrap = document.createElement('div');
-  gridWrap.appendChild(buildGrid());
-  editor.appendChild(gridWrap);
+  const title = document.createElement('h4');
+  title.textContent = `Edit tile — Player ${p}, slot ${idx+1}`;
+  const sub = document.createElement('div');
+  sub.className = 'te-sub';
+  sub.textContent = `Current: ${card.color} ${card.rank}. Click a card to select, then Apply.`;
+  editor.appendChild(title);
+  editor.appendChild(sub);
 
-  // re-render grid reactively by replacing it
-  // override buildGrid to update gridWrap
-  const origBuildGrid = buildGrid;
-  function rebuildGrid() {
-    const newGrid = origBuildGrid();
-    gridWrap.innerHTML = '';
-    gridWrap.appendChild(newGrid);
-  }
-  // patch cell clicks to also rebuild
-  function buildGridPatched() {
-    const grid = document.createElement('div');
-    grid.className = 'te-grid';
+  const grid = document.createElement('div');
+  grid.className = 'te-grid';
+  editor.appendChild(grid);
+
+  function renderGrid() {
+    grid.innerHTML = '';
     for(const r of [1,2,3,4,5]) {
       for(const c of COLORS) {
         const key = c+','+r;
-        const avail = (pool[key]||0) + (c===card.color&&r===card.rank?1:0);
-        const isSelected = c===selectedColor && r===selectedRank;
+        // available = pool remaining + 1 if this is the current card (it goes back)
+        const avail = (pool[key]||0) + (c===card.color && r===card.rank ? 1 : 0);
+        const isSelected = c===selC && r===selR;
         const isUnavail = avail <= 0 && !isSelected;
+
         const cell = document.createElement('div');
-        cell.className = 'te-cell'+(isSelected?' selected':'')+(isUnavail?' unavailable':'');
+        cell.className = 'te-cell' + (isSelected?' selected':'') + (isUnavail?' unavailable':'');
         cell.style.background = CHX[c];
-        cell.innerHTML = r + (avail>1?`<span class="te-count">×${avail}</span>`:'');
-        cell.title = `${c} ${r} — ${avail} available`;
+        cell.style.color = '#fff';
+        cell.innerHTML = r + (avail > 1 ? `<span class="te-count">×${avail}</span>` : '');
+        cell.title = `${c} ${r} — ${avail} in pool`;
+
         if(!isUnavail) {
-          cell.onclick = () => {
-            selectedColor = c; selectedRank = r;
-            gridWrap.innerHTML = '';
-            gridWrap.appendChild(buildGridPatched());
-          };
+          cell.addEventListener('click', () => {
+            selC = c; selR = r;
+            renderGrid();
+          });
         }
         grid.appendChild(cell);
       }
     }
-    return grid;
   }
-  gridWrap.innerHTML = '';
-  gridWrap.appendChild(buildGridPatched());
+  renderGrid();
 
   const footer = document.createElement('div');
   footer.className = 'te-footer';
 
   const cancelBtn = document.createElement('button');
-  cancelBtn.className = 'btn'; cancelBtn.textContent = 'Cancel';
+  cancelBtn.className = 'btn';
+  cancelBtn.textContent = 'Cancel';
   cancelBtn.onclick = () => { overlay.remove(); tileEditorEl=null; };
 
   const applyBtn = document.createElement('button');
@@ -1470,11 +1436,9 @@ function openTileEditor(p, idx, g) {
   applyBtn.style.cssText = 'width:auto;padding:8px 20px;font-size:13px;margin-top:0;border-radius:7px;';
   applyBtn.textContent = 'Apply';
   applyBtn.onclick = () => {
-    if(selectedColor===card.color && selectedRank===card.rank) {
-      overlay.remove(); tileEditorEl=null; return;
-    }
-    applyTileEdit(p, idx, selectedColor, selectedRank);
     overlay.remove(); tileEditorEl=null;
+    if(selC===card.color && selR===card.rank) return;
+    applyTileEdit(p, idx, selC, selR);
   };
 
   footer.appendChild(cancelBtn);
