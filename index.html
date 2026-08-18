@@ -662,7 +662,7 @@ function startGame(n,seed){
   const db=document.getElementById('director-btn');
   db.style.display='inline-block';
   db.textContent='🎬 '+(directorMode?'Director ON':'Director OFF');
-  db.onclick=()=>{directorMode=!directorMode;db.textContent='🎬 '+(directorMode?'Director ON':'Director OFF');selSlot=null;clueMode=false;renderAll();};
+  db.onclick=()=>{directorMode=!directorMode;db.textContent='🎬 '+(directorMode?'Director ON':'Director OFF');selSlot=null;selPlayer=null;clueMode=false;renderAll();};
   render();
 }
 
@@ -845,7 +845,7 @@ function renderHands(g){
         const dm=clueMode&&clueTarget===p&&clueType&&!hl;
         const t=buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueMode&&p!==cp,isSelectable&&selSlot===i&&selPlayer===p,p,i);
         if(isSelectable&&!clueMode&&!replayMode){
-          t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands(g);renderAction(g);};
+          t.onclick=()=>{if(selSlot===i&&selPlayer===p){selSlot=null;selPlayer=null;}else{selSlot=i;selPlayer=p;}clueMode=false;renderHands(g);renderAction(g);};
         }
         if(clueMode&&p!==cp&&!replayMode){t.onclick=()=>{clueTarget=p;renderAction(g);renderHands(g);};}
         hand.appendChild(t);
@@ -967,7 +967,7 @@ function renderMove(panel,g){
   const cp=g.turn;
   const isBot=directorMode&&cp!==humanSeat;
   panel.innerHTML=`<div class="ap-title">${isBot?'Bot P'+cp+' — director\'s call':'Your move'}</div>
-    <div class="ap-hint">${selSlot===null?'Click a tile in your hand to select it, or drag to play/discard.':'Slot '+selSlot+' selected.'}</div>`;
+    <div class="ap-hint">${selSlot===null?'Click a tile in your hand to select it.':'Slot '+(selSlot+1)+' selected.'}</div>`;
   const row=document.createElement('div');row.className='ap-row';
   const pb=btn('▶ Play',selSlot===null,()=>doAction({kind:'play',idx:selSlot}));row.appendChild(pb);
   const db=btn('✕ Discard',selSlot===null||g.clues>=MAX_C,()=>doAction({kind:'discard',idx:selSlot}),'danger');
