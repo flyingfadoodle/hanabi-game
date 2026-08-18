@@ -144,6 +144,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tile.clueable{cursor:pointer;}
 .tile.clueable:hover:not(.clued){transform:translateY(-3px);box-shadow:0 5px 0 #b8a860,0 8px 12px rgba(0,0,0,.18);}
 .tile.hl{outline:2px solid var(--accent);outline-offset:3px;}
+.tile.dir-sel{outline:2px solid var(--accent);outline-offset:3px;transform:translateY(-5px);box-shadow:0 7px 0 #b8a860,0 10px 14px rgba(0,0,0,.2);}
 .tile.dim{opacity:.3;}
 .tile.empty{background:repeating-linear-gradient(45deg,#e8e4de,#e8e4de 5px,#ddd8d0 5px,#ddd8d0 10px);box-shadow:none;border:1px dashed var(--border2);}
 
@@ -839,7 +840,7 @@ function renderHands(g){
         hand.appendChild(t);
       } else {
         // visible tile
-        const isSelectable=(directorMode&&p===cp)||false;
+        const isSelectable=directorMode&&!clueMode;
         const hl=clueMode&&clueTarget===p&&clueType&&((clueType==='color'&&card.color===clueVal)||(clueType==='rank'&&card.rank===clueVal));
         const dm=clueMode&&clueTarget===p&&clueType&&!hl;
         const t=buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueMode&&p!==cp,isSelectable&&selSlot===i,p,i);
@@ -873,7 +874,7 @@ function renderHands(g){
 
 function buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueable,selected,editP,editIdx){
   const t=document.createElement('div');
-  t.className='tile'+(isClued?' clued':'')+(clueable?' clueable':'')+(hl?' hl':'')+(dm?' dim':'')+(selected?' sel':'');
+  t.className='tile'+(isClued?' clued':'')+(clueable?' clueable':'')+(hl?' hl':'')+(dm?' dim':'')+(selected?' dir-sel':'');
   t.innerHTML=tileInner(card.color,card.rank);
   if(isCrit)t.innerHTML+=`<div class="tile-critical">❗</div>`;
   if(showArrow){
