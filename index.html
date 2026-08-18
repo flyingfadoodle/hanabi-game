@@ -313,6 +313,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tut-btn{background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;padding:8px 18px;cursor:pointer;font-family:inherit;}
 .tut-skip{background:none;border:none;color:var(--ink3);font-size:12px;cursor:pointer;font-family:inherit;padding:4px;}
 .tut-skip:hover{color:var(--ink);}
+
+/* ── TILE EDITOR ── */
+.tile-editor-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;display:flex;align-items:center;justify-content:center;}
+.tile-editor{background:#fff;border-radius:12px;padding:20px 22px;width:380px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.tile-editor h4{font-size:14px;font-weight:800;color:var(--accent);margin-bottom:4px;}
+.tile-editor .te-sub{font-size:11px;color:var(--ink3);margin-bottom:14px;}
+.te-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:16px;}
+.te-cell{
+  aspect-ratio:1;border-radius:7px;border:2px solid transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:13px;color:#fff;cursor:pointer;
+  transition:transform .1s,border-color .1s;
+  position:relative;
+}
+.te-cell:hover{transform:scale(1.1);}
+.te-cell.selected{border-color:#000;transform:scale(1.12);}
+.te-cell.unavailable{opacity:.2;cursor:not-allowed;}
+.te-cell.unavailable:hover{transform:none;}
+.te-cell .te-count{position:absolute;bottom:2px;right:3px;font-size:8px;font-weight:700;opacity:.85;}
+.te-footer{display:flex;justify-content:flex-end;gap:8px;}
 </style>
 </head>
 <body>
@@ -822,7 +842,7 @@ function renderHands(g){
         const isSelectable=(directorMode&&p===cp)||false;
         const hl=clueMode&&clueTarget===p&&clueType&&((clueType==='color'&&card.color===clueVal)||(clueType==='rank'&&card.rank===clueVal));
         const dm=clueMode&&clueTarget===p&&clueType&&!hl;
-        const t=buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueMode&&p!==cp,isSelectable&&selSlot===i);
+        const t=buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueMode&&p!==cp,isSelectable&&selSlot===i,p,i);
         if(isSelectable&&!clueMode&&!replayMode){
           t.onclick=()=>{selSlot=selSlot===i?null:i;clueMode=false;renderHands(g);renderAction(g);};
         }
@@ -851,7 +871,7 @@ function renderHands(g){
   }
 }
 
-function buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueable,selected){
+function buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueable,selected,editP,editIdx){
   const t=document.createElement('div');
   t.className='tile'+(isClued?' clued':'')+(clueable?' clueable':'')+(hl?' hl':'')+(dm?' dim':'')+(selected?' sel':'');
   t.innerHTML=tileInner(card.color,card.rank);
@@ -859,6 +879,19 @@ function buildVisibleTile(card,k,isCrit,isClued,showArrow,hl,dm,clueable,selecte
   if(showArrow){
     const a=buildArrow(k.clues[k.clues.length-1]||'');
     t.appendChild(a);
+  }
+  // right-click to edit in director mode
+  if(directorMode && editP!==undefined && !replayMode){
+    t.title='Right-click to edit tile';
+    t.addEventListener('contextmenu', e=>{
+      e.preventDefault();
+      openTileEditor(editP, editIdx, game);
+    });
+    // show small edit indicator
+    const ed=document.createElement('div');
+    ed.style.cssText='position:absolute;top:2px;left:2px;font-size:8px;opacity:.35;line-height:1;';
+    ed.textContent='✎';
+    t.appendChild(ed);
   }
   return t;
 }
@@ -1313,6 +1346,165 @@ const mo=new MutationObserver(()=>{
 });
 mo.observe(document.body,{childList:true,subtree:true});
 
+
+
+// ── TILE EDITOR ──────────────────────────────────────────
+let tileEditorEl = null;
+
+function openTileEditor(p, idx, g) {
+  if(tileEditorEl) tileEditorEl.remove();
+
+  const card = g.hands[p][idx];
+
+  // Build pool: all cards not in played stacks, not in discard, not in hands (except the one being replaced)
+  const pool = {}; // key -> count available
+  // start with full deck counts
+  for(const c of COLORS) for(const r of [1,2,3,4,5]) pool[c+','+r] = RC[r];
+  // subtract played
+  for(const c of COLORS) for(let r=1; r<=g.fw[c]; r++) pool[c+','+r]--;
+  // subtract discarded
+  for(const dc of g.disc) pool[dc.color+','+dc.rank]--;
+  // subtract all hand cards except the one being edited
+  for(let pp=0; pp<g.n; pp++) {
+    for(let ii=0; ii<g.hands[pp].length; ii++) {
+      if(pp===p && ii===idx) continue; // skip the card being replaced
+      const hc = g.hands[pp][ii];
+      pool[hc.color+','+hc.rank]--;
+    }
+  }
+  // subtract remaining deck cards
+  for(const dc of g.deck) pool[dc.color+','+dc.rank]--;
+
+  let selectedColor = card.color;
+  let selectedRank = card.rank;
+
+  function buildGrid() {
+    const grid = document.createElement('div');
+    grid.className = 'te-grid';
+    for(const r of [1,2,3,4,5]) {
+      for(const c of COLORS) {
+        const key = c+','+r;
+        const avail = (pool[key]||0) + (c===card.color&&r===card.rank?1:0); // add back current card
+        const isSelected = c===selectedColor && r===selectedRank;
+        const isUnavail = avail <= 0 && !isSelected;
+        const cell = document.createElement('div');
+        cell.className = 'te-cell'+(isSelected?' selected':'')+(isUnavail?' unavailable':'');
+        cell.style.background = CHX[c];
+        cell.innerHTML = r + (avail>1?`<span class="te-count">×${avail}</span>`:'');
+        cell.title = `${c} ${r} — ${avail} available`;
+        if(!isUnavail) {
+          cell.onclick = () => {
+            selectedColor = c; selectedRank = r;
+            // re-render grid
+            const newGrid = buildGrid();
+            grid.replaceWith(newGrid);
+          };
+        }
+        grid.appendChild(cell);
+      }
+    }
+    return grid;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'tile-editor-overlay';
+  overlay.onclick = (e) => { if(e.target===overlay) overlay.remove(); tileEditorEl=null; };
+
+  const editor = document.createElement('div');
+  editor.className = 'tile-editor';
+  editor.innerHTML = `<h4>Edit tile — Player ${p}, slot ${idx}</h4>
+    <div class="te-sub">Current: ${card.color} ${card.rank}. Pick a replacement. Only available cards shown.</div>`;
+
+  const gridWrap = document.createElement('div');
+  gridWrap.appendChild(buildGrid());
+  editor.appendChild(gridWrap);
+
+  // re-render grid reactively by replacing it
+  // override buildGrid to update gridWrap
+  const origBuildGrid = buildGrid;
+  function rebuildGrid() {
+    const newGrid = origBuildGrid();
+    gridWrap.innerHTML = '';
+    gridWrap.appendChild(newGrid);
+  }
+  // patch cell clicks to also rebuild
+  function buildGridPatched() {
+    const grid = document.createElement('div');
+    grid.className = 'te-grid';
+    for(const r of [1,2,3,4,5]) {
+      for(const c of COLORS) {
+        const key = c+','+r;
+        const avail = (pool[key]||0) + (c===card.color&&r===card.rank?1:0);
+        const isSelected = c===selectedColor && r===selectedRank;
+        const isUnavail = avail <= 0 && !isSelected;
+        const cell = document.createElement('div');
+        cell.className = 'te-cell'+(isSelected?' selected':'')+(isUnavail?' unavailable':'');
+        cell.style.background = CHX[c];
+        cell.innerHTML = r + (avail>1?`<span class="te-count">×${avail}</span>`:'');
+        cell.title = `${c} ${r} — ${avail} available`;
+        if(!isUnavail) {
+          cell.onclick = () => {
+            selectedColor = c; selectedRank = r;
+            gridWrap.innerHTML = '';
+            gridWrap.appendChild(buildGridPatched());
+          };
+        }
+        grid.appendChild(cell);
+      }
+    }
+    return grid;
+  }
+  gridWrap.innerHTML = '';
+  gridWrap.appendChild(buildGridPatched());
+
+  const footer = document.createElement('div');
+  footer.className = 'te-footer';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn'; cancelBtn.textContent = 'Cancel';
+  cancelBtn.onclick = () => { overlay.remove(); tileEditorEl=null; };
+
+  const applyBtn = document.createElement('button');
+  applyBtn.className = 'btn-go';
+  applyBtn.style.cssText = 'width:auto;padding:8px 20px;font-size:13px;margin-top:0;border-radius:7px;';
+  applyBtn.textContent = 'Apply';
+  applyBtn.onclick = () => {
+    if(selectedColor===card.color && selectedRank===card.rank) {
+      overlay.remove(); tileEditorEl=null; return;
+    }
+    applyTileEdit(p, idx, selectedColor, selectedRank);
+    overlay.remove(); tileEditorEl=null;
+  };
+
+  footer.appendChild(cancelBtn);
+  footer.appendChild(applyBtn);
+  editor.appendChild(footer);
+  overlay.appendChild(editor);
+  document.body.appendChild(overlay);
+  tileEditorEl = overlay;
+}
+
+function applyTileEdit(p, idx, newColor, newRank) {
+  // save snapshot for undo
+  snapshots.push({game: game.clone(), thinkLines: [...thinkLines]});
+  if(snapshots.length > 80) snapshots.shift();
+  document.getElementById('rewind-btn').disabled = false;
+
+  const oldCard = game.hands[p][idx];
+  // put old card back into deck at random position
+  const insertAt = Math.floor(Math.random() * (game.deck.length + 1));
+  game.deck.splice(insertAt, 0, {color: oldCard.color, rank: oldCard.rank});
+  // place new card in hand
+  game.hands[p][idx] = {color: newColor, rank: newRank};
+  // reset knowledge for that slot
+  game.know[p][idx] = newK();
+  // re-run elimination
+  game.elim();
+  // re-render and update win odds
+  renderAll();
+  scheduleWin();
+  toast(`P${p} slot ${idx}: ${oldCard.color[0]}${oldCard.rank} → ${newColor[0]}${newRank}`);
+}
 
 // ── UTILS ─────────────────────────────────────────────────
 function toast(msg,err=false){
